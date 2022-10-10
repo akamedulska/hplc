@@ -1,0 +1,126 @@
+# Columns: XBridge Shield and XTerra {.unnumbered}
+
+A comparison of the two series of columns can be found on the website: <https://www.waters.com/nextgen/us/en/products/columns/compare-columns.html?productname=xbridge-columns%2Cxterra-columns>.
+
+Data of the 300 small molecules from the XBrigde Shield C18 and XTerra C18 columns are generally available at the following links: [XBridge Shield C18](https://osf.io/zqtj7/?view_only=074c5324c26e44529273523b280ecb05) and [XTerra C18](https://osf.io/qbv7j/?view_only=c5431b9e9f68423ab665f5f5b2b4606f).
+
+## Raw data
+```{r}
+#| echo: false
+#| message: false
+library(pracma)
+library(dplyr)
+library(ggplot2)
+require(gridExtra)
+library(GGally)
+library(cmdstanr)
+library(rstan)
+library(knitr)
+library(reshape2)
+library(bayesplot)
+library(posterior)
+
+set.seed(10271998) ## not required but assures repeatable results
+```
+
+```{r}
+#| echo: false
+dataNames = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/4-compounds-names.csv')
+dataACD = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/2-ACD-pKas-logP.csv')
+functional_groups = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/6-checkmol-functional-groups.csv')
+functional_groups_names = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/Legend-checkmol-functional-group-names.csv')
+
+# predictors
+pKaslit = dataACD[,3:7]           # pKa values as predicted by ACD
+pKasliterror = dataACD[,25:29]    # pKa error as predicted by ACD
+chargesA = abs(dataACD[,13:18])   # number of ionized groups (anions)
+chargesB = abs(dataACD[,19:24])   # number of ionized groups (cations)
+charges = chargesA+chargesB                         # absolute charge
+groupsA = (chargesA[,2:5] - chargesA[,1:4])         # acidic group
+groupsB = -(chargesB[,2:5] - chargesB[,1:4])        # basic group
+R = rowSums(pKaslit<14)                             # number of dissociation steps
+logP = dataACD$logP 
+
+data1 = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/1-X_Bridge_Shield_C18_5cm.csv')
+data1$Mod  = as.character(data1$Mod)
+data1$Mod2 = ifelse(data1$Mod=="MeOH",1,2)                        # MeOH = 1, ACN = 2
+
+data1 <- data1[-which(data1$Score<95),]
+
+ID_freq <- as.data.frame(table(data1$METID))
+ID <- ID_freq[which(ID_freq$Freq>42),1]
+data1 <- data1[which(data1$METID %in% ID),]
+rm(ID_freq,ID)
+
+data1$METEXPID = data1$METID*100+data1$EXPID
+data1 <- data1 %>% 
+  group_by(METEXPID) %>%
+  slice(which.max(Score))
+
+data1 <- data1[-which(data1$METID==72),]
+
+data1 = data1[which(data1$METID %in% which(R<=2)),]
+
+data1$column <- rep("XBridge Shield C18",nrow(data1))
+
+data2 = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Terra_C18/skrypt_R/data/1-XTerra_MS_C18.csv')
+data2$Mod  = as.character(data2$Mod)
+data2$Mod2 = ifelse(data2$Mod=="MeOH",1,2)                        # MeOH = 1, ACN = 2
+
+data2 <- data2[-which(data2$Score<95),]
+
+ID_freq <- as.data.frame(table(data2$METID))
+ID <- ID_freq[which(ID_freq$Freq>42),1]
+data2 <- data2[which(data2$METID %in% ID),]
+rm(ID_freq,ID)
+
+data2$METEXPID = data2$METID*100+data2$EXPID
+data2 <- data2 %>% 
+  group_by(METEXPID) %>%
+  slice(which.max(Score))
+
+data2 <- data2[-which(data2$METID==72),]
+
+data2 = data2[which(data2$METID %in% which(R<=2)),]
+
+data2$column <- rep("XTerra C18",nrow(data2))
+
+data <- rbind(data1,data2)
+```
+
+```{r}
+#| echo: false
+analyte_ID_sample <- c(8,9,17,33,58,180)
+
+temp.labs <- c("25\u00b0C","35\u00b0C")
+names(temp.labs) <- c('25','35')
+
+mod.labs <- c("ACN","MeOH")
+names(mod.labs) <- c('2','1')
+
+for(i in 1:length(analyte_ID_sample)){
+p <- ggplot(data[which(data$METID %in% analyte_ID_sample[i]),])+
+      geom_point(aes(x = pHs, y = RT, color = as.factor(tg), shape=column))+ 
+      facet_grid(Temp~Mod2, labeller = labeller(Temp=temp.labs,Mod2=mod.labs))+
+      labs(title=paste(dataNames$Name[analyte_ID_sample[i]]), x ="pH", y = "Retention time, min", color = "Gradient time, min", shape="Column")
+print(p)
+}
+```
+
+All analytes:
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+analyte_ID_sample <- unique(data$METID)
+
+for(i in 1:length(analyte_ID_sample)){
+p <- ggplot(data[which(data$METID %in% analyte_ID_sample[i]),])+
+      geom_point(aes(x = pHs, y = RT, color = as.factor(tg), shape=column))+ 
+      facet_grid(Temp~Mod2, labeller = labeller(Temp=temp.labs,Mod2=mod.labs))+ylim(c(0,175))+
+      labs(title=paste(dataNames$Name[analyte_ID_sample[i]]), x ="pH", y = "Retention time, min", color = "Gradient time, min", shape="Column")
+print(p)
+}
+
+```

@@ -1,0 +1,32 @@
+project:
+  type: book
+
+book:
+  title: "RP-HPLC"
+  author: "Agnieszka Kamedulska"
+  date: "7.10.2022"
+  chapters:
+    - index.qmd
+    - part: Model_1.qmd
+      chapters:
+      - Model_1_a.qmd
+      - Model_1_b.qmd
+      - Model_1_c.qmd
+      - Model_1_d.qmd
+    - part: Model_2.qmd
+      chapters:
+      - Model_2_a.qmd
+    #  - intro.qmd
+    #  - summary.qmd
+    #  - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrreprt
+
+editor: visual
+

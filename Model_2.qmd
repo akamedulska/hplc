@@ -1,0 +1,3 @@
+# Model 2 {.unnumbered}
+
+In the model, all parameters (except for the pKa of the compounds) were duplicated to investigate the inter-column variability.

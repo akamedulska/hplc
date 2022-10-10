@@ -1,0 +1,68 @@
+# Estimated parameters
+
+## Column XBridge Shield C18
+
+```{r}
+#| echo: false
+
+fit_Bridge <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_1.csv',
+                                         'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_2.csv',
+                                         'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_3.csv',
+                                         'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_4.csv'))
+
+fit_Bridge$print(c("logkwHat","S1mHat","S1aHat", 
+            "dlogkwHat","dSmHat","dSaHat","S2mHat","S2aHat",
+            "beta","alphaAHat","alphaBHat",
+            "dlogkTHat","omegadlogkT",
+            "apH","msigma","ssigma",
+            "omega","rho1","L2","kappa","tau"), max_rows=100)
+
+bayesplot::mcmc_areas(fit_Bridge$draws(c("logkwHat")))
+bayesplot::mcmc_areas(fit_Bridge$draws(c("S1mHat","S1aHat"))) 
+bayesplot::mcmc_areas(fit_Bridge$draws(c("dlogkwHat","dSmHat","dSaHat"))) 
+bayesplot::mcmc_areas(fit_Bridge$draws(c("S2mHat","S2aHat")))
+bayesplot::mcmc_areas(fit_Bridge$draws(c("beta")))
+bayesplot::mcmc_areas(fit_Bridge$draws(c("alphaAHat","alphaBHat")))
+bayesplot::mcmc_areas(fit_Bridge$draws(c("dlogkTHat","omegadlogkT")))
+bayesplot::mcmc_areas(fit_Bridge$draws(c("apH"))) 
+bayesplot::mcmc_areas(fit_Bridge$draws(c("msigma","ssigma"))) 
+bayesplot::mcmc_areas(fit_Bridge$draws(c("omega")))
+bayesplot::mcmc_areas(fit_Bridge$draws(c("rho1","L2")))
+bayesplot::mcmc_areas(fit_Bridge$draws(c("kappa")))
+bayesplot::mcmc_areas(fit_Bridge$draws(c("tau")))
+
+draws_df_Bridge <- fit_Bridge$draws(format = "df")
+```
+
+## Column XTerra C18
+
+```{r}
+#| echo: false
+fit_Terra <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/X_Terra_C18/TASK/output_1.csv',
+                                        'C:/Users/agnie/Desktop/HPLC_2022/X_Terra_C18/TASK/output_2.csv',
+                                        'C:/Users/agnie/Desktop/HPLC_2022/X_Terra_C18/TASK/output_3.csv',
+                                        'C:/Users/agnie/Desktop/HPLC_2022/X_Terra_C18/TASK/output_4.csv'))
+
+fit_Terra$print(c("logkwHat","S1mHat","S1aHat", 
+            "dlogkwHat","dSmHat","dSaHat","S2mHat","S2aHat",
+            "beta","alphaAHat","alphaBHat",
+            "dlogkTHat","omegadlogkT",
+            "apH","msigma","ssigma",
+            "omega","rho1","L2","kappa","tau"), max_rows=100)
+
+bayesplot::mcmc_areas(fit_Terra$draws(c("logkwHat")))
+bayesplot::mcmc_areas(fit_Terra$draws(c("S1mHat","S1aHat"))) 
+bayesplot::mcmc_areas(fit_Terra$draws(c("dlogkwHat","dSmHat","dSaHat"))) 
+bayesplot::mcmc_areas(fit_Terra$draws(c("S2mHat","S2aHat")))
+bayesplot::mcmc_areas(fit_Terra$draws(c("beta")))
+bayesplot::mcmc_areas(fit_Terra$draws(c("alphaAHat","alphaBHat")))
+bayesplot::mcmc_areas(fit_Terra$draws(c("dlogkTHat","omegadlogkT")))
+bayesplot::mcmc_areas(fit_Terra$draws(c("apH"))) 
+bayesplot::mcmc_areas(fit_Terra$draws(c("msigma","ssigma"))) 
+bayesplot::mcmc_areas(fit_Terra$draws(c("omega")))
+bayesplot::mcmc_areas(fit_Terra$draws(c("rho1","L2")))
+bayesplot::mcmc_areas(fit_Terra$draws(c("kappa")))
+bayesplot::mcmc_areas(fit_Terra$draws(c("tau")))
+
+draws_df_Terra <- fit_Terra$draws(format = "df")
+```

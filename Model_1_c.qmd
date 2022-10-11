@@ -1,2 +1,178 @@
 # Comparison of population parameter values
 
+```{r}
+#| echo: false
+#| message: false
+library(pracma)
+library(dplyr)
+library(ggplot2)
+require(gridExtra)
+library(GGally)
+library(cmdstanr)
+library(rstan)
+library(knitr)
+library(reshape2)
+library(bayesplot)
+library(posterior)
+
+set.seed(10271998) ## not required but assures repeatable results
+```
+
+## XBridge Shield C18
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+fit_Bridge <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_1.csv',
+                                         'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_2.csv',
+                                         'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_3.csv',
+                                         'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_4.csv'))
+
+draws_df_Bridge <- fit_Bridge$draws(format = "df")
+
+parameters <- c("logkwHat","S1mHat","S1aHat","S2mHat","S2aHat","dlogkwHat[1]","dlogkwHat[2]","dSmHat[1]","dSmHat[2]",
+"dSaHat[1]","dSaHat[2]","dlogkTHat","beta[1]","beta[2]","beta[3]","alphaAHat[1]","alphaAHat[2]",
+"alphaBHat[1]","alphaBHat[2]","omega[1]","omega[2]","omega[3]","omegadlogkT","kappa[1]","kappa[2]","kappa[3]",
+"tau[1]","tau[2]","apH[1]","apH[2]","msigma","ssigma")
+
+data_to_plot_par_Bridge <- draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% parameters)]
+
+lab <- c(expression(theta["logkwN"]),
+         expression(theta["S1mN"]),expression(theta["S1aN"]),
+         expression(theta["S2m"]),expression(theta["S2a"]),
+         expression(theta["dlogkwA"]),expression(theta["dlogkwB"]),
+         expression(theta["dSmA"]),expression(theta["dSmB"]),
+         expression(theta["dSaA"]),expression(theta["dSaB"]),
+         expression(theta["dlogkT"]),
+         expression(beta["logkwN"]),expression(beta["S1mN"]),
+         expression(beta["S1aN"]),
+         expression(alpha["mA"]),expression(alpha["aA"]),
+         expression(alpha["mB"]),expression(alpha["aB"]),
+         expression(omega["logkwN"]),expression(omega["S1mN"]),
+         expression(omega["S1aN"]),expression(omega["dlogkT"]),
+         expression(kappa["logkwN"]),expression(kappa["S1mN"]),
+         expression(kappa["S1aN"]),
+         expression(tau["m"]),expression(tau["a"]),
+         expression(apH["A"]),expression(apH["B"]),
+         expression(m[sigma]),expression(s[sigma]))
+ 
+library(reshape2)
+pp_B <- melt(data_to_plot_par_Bridge)
+pp_B[,1] <- ordered(pp_B[,1],parameters) 
+pp_B$Column <- rep("XBridge Shield C18",nrow(pp_B))
+ggplot(data = pp_B, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable))+ coord_flip()+
+  theme(legend.position = "none")+ scale_x_discrete(labels=rev(lab),limits=rev)+
+  labs(y="Marginal posterior distributions",x="")
+```
+
+## XTerra C18
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+fit_Terra <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/X_Terra_C18/TASK/output_1.csv',
+                                        'C:/Users/agnie/Desktop/HPLC_2022/X_Terra_C18/TASK/output_2.csv',
+                                        'C:/Users/agnie/Desktop/HPLC_2022/X_Terra_C18/TASK/output_3.csv',
+                                        'C:/Users/agnie/Desktop/HPLC_2022/X_Terra_C18/TASK/output_4.csv'))
+
+draws_df_Terra <- fit_Terra$draws(format = "df")
+
+parameters <- c("logkwHat","S1mHat","S1aHat","S2mHat","S2aHat","dlogkwHat[1]","dlogkwHat[2]","dSmHat[1]","dSmHat[2]",
+"dSaHat[1]","dSaHat[2]","dlogkTHat","beta[1]","beta[2]","beta[3]","alphaAHat[1]","alphaAHat[2]",
+"alphaBHat[1]","alphaBHat[2]","omega[1]","omega[2]","omega[3]","omegadlogkT","kappa[1]","kappa[2]","kappa[3]",
+"tau[1]","tau[2]","apH[1]","apH[2]","msigma","ssigma")
+
+data_to_plot_par_Terra <- draws_df_Terra[,which(colnames(draws_df_Terra) %in% parameters)]
+
+lab <- c(expression(theta["logkwN"]),
+         expression(theta["S1mN"]),expression(theta["S1aN"]),
+         expression(theta["S2m"]),expression(theta["S2a"]),
+         expression(theta["dlogkwA"]),expression(theta["dlogkwB"]),
+         expression(theta["dSmA"]),expression(theta["dSmB"]),
+         expression(theta["dSaA"]),expression(theta["dSaB"]),
+         expression(theta["dlogkT"]),
+         expression(beta["logkwN"]),expression(beta["S1mN"]),
+         expression(beta["S1aN"]),
+         expression(alpha["mA"]),expression(alpha["aA"]),
+         expression(alpha["mB"]),expression(alpha["aB"]),
+         expression(omega["logkwN"]),expression(omega["S1mN"]),
+         expression(omega["S1aN"]),expression(omega["dlogkT"]),
+         expression(kappa["logkwN"]),expression(kappa["S1mN"]),
+         expression(kappa["S1aN"]),
+         expression(tau["m"]),expression(tau["a"]),
+         expression(apH["A"]),expression(apH["B"]),
+         expression(m[sigma]),expression(s[sigma]))
+ 
+library(reshape2)
+pp_T <- melt(data_to_plot_par_Terra)
+pp_T[,1] <- ordered(pp_T[,1],parameters) 
+pp_T$Column <- rep("XTerra C18",nrow(pp_T))
+ggplot(data = pp_T, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable))+ coord_flip()+
+  theme(legend.position = "none")+ scale_x_discrete(labels=rev(lab),limits=rev)+
+  labs(y="Marginal posterior distributions",x="")
+
+```
+
+## Comparison of the columns
+
+```{r, fig.height=12}
+#| echo: false
+#| message: false
+#| warning: false
+pp <- rbind(pp_B,pp_T)
+ggplot(data = pp, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Column))+ coord_flip()+
+  #theme(legend.position = "none")+ 
+  scale_x_discrete(labels=rev(lab),limits=rev)+
+  labs(y="Marginal posterior distributions",x="")
+```
+
+```{r, fig.height=14}
+#| echo: false
+#| message: false
+#| warning: false
+lab_names <- list(
+  	'logkwHat'=expression(theta["logkwN"]),
+  	"S1mHat"=expression(theta["S1mN"]),
+  	"S1aHat"=expression(theta["S1aN"]),
+    "S2mHat"=expression(theta["S2m"]),
+	  "S2aHat"=expression(theta["S2a"]),
+    "dlogkwHat[1]"=expression(theta["dlogkwA"]),
+	  "dlogkwHat[2]"=expression(theta["dlogkwB"]),
+    "dSmHat[1]"=expression(theta["dSmA"]),
+	  "dSmHat[2]"=expression(theta["dSmB"]),
+    "dSaHat[1]"=expression(theta["dSaA"]),
+	  "dSaHat[2]"=expression(theta["dSaB"]),
+    "dlogkTHat"=expression(theta["dlogkT"]),
+    "beta[1]"=expression(beta["logkwN"]),
+	  "beta[2]"=expression(beta["S1mN"]),
+    "beta[3]"=expression(beta["S1aN"]),
+    "alphaAHat[1]"=expression(alpha["mA"]),
+	  "alphaAHat[2]"=expression(alpha["aA"]),
+    "alphaBHat[1]"=expression(alpha["mB"]),
+	  "alphaBHat[2]"=expression(alpha["aB"]),
+    "omega[1]"=expression(omega["logkwN"]),
+	  "omega[2]"=expression(omega["S1mN"]),
+    "omega[3]"=expression(omega["S1aN"]),
+	  "omegadlogkT"=expression(omega["dlogkT"]),
+    "kappa[1]"=expression(kappa["logkwN"]),
+	  "kappa[2]"=expression(kappa["S1mN"]),
+    "kappa[3]"=expression(kappa["S1aN"]),
+    "tau[1]"=expression(tau["m"]),
+	  "tau[2]"=expression(tau["a"]),
+    "apH[1]"=expression(apH["A"]),
+	  "apH[2]"=expression(apH["B"]),
+    "msigma"=expression(m[sigma]),
+	  "ssigma"=expression(s[sigma])
+)
+
+lab_labeller <- function(variable,value){
+  return(lab_names[value])
+}
+
+ggplot(data = pp, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Column))+ coord_flip()+
+  #theme(legend.position = "none")+ 
+  scale_x_discrete(labels=lab_labeller())+
+  labs(y="Marginal posterior distributions",x="")+facet_wrap(~variable, labeller=lab_labeller,scales = "free_y", nrow = 16)
+```

@@ -1,5 +1,6 @@
 project:
   type: book
+  output-dir: docs
 
 book:
   title: "RP-HPLC"
@@ -25,8 +26,8 @@ bibliography: references.bib
 format:
   html:
     theme: cosmo
-  pdf:
-    documentclass: scrreprt
+ # pdf:
+ #   documentclass: scrreprt
 
 editor: visual
 

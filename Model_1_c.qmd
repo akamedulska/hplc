@@ -174,5 +174,5 @@ lab_labeller <- function(variable,value){
 ggplot(data = pp, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Column))+ coord_flip()+
   #theme(legend.position = "none")+ 
   scale_x_discrete(labels=lab_labeller())+
-  labs(y="Marginal posterior distributions",x="")+facet_wrap(~variable, labeller=lab_labeller,scales = "free_y", nrow = 16)
+  labs(y="Marginal posterior distributions",x="")+facet_wrap(~variable, labeller=lab_labeller,scales = "free", nrow = 16)
 ```

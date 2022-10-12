@@ -1,1 +1,362 @@
 # Comparison of individual parameter values
+
+```{r}
+#| echo: false
+#| message: false
+library(pracma)
+library(dplyr)
+library(ggplot2)
+require(gridExtra)
+library(GGally)
+library(cmdstanr)
+library(rstan)
+library(knitr)
+library(reshape2)
+library(bayesplot)
+library(posterior)
+
+set.seed(10271998) ## not required but assures repeatable results
+
+fit_Bridge <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_1.csv',
+                                         'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_2.csv',
+                                         'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_3.csv',
+                                         'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_4.csv'))
+
+draws_df_Bridge <- fit_Bridge$draws(format = "df")
+
+fit_Terra <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/X_Terra_C18/TASK/output_1.csv',
+                                        'C:/Users/agnie/Desktop/HPLC_2022/X_Terra_C18/TASK/output_2.csv',
+                                        'C:/Users/agnie/Desktop/HPLC_2022/X_Terra_C18/TASK/output_3.csv',
+                                        'C:/Users/agnie/Desktop/HPLC_2022/X_Terra_C18/TASK/output_4.csv'))
+
+draws_df_Terra <- fit_Terra$draws(format = "df")
+
+dataNames = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/4-compounds-names.csv')
+dataACD = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/2-ACD-pKas-logP.csv')
+functional_groups = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/6-checkmol-functional-groups.csv')
+functional_groups_names = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/Legend-checkmol-functional-group-names.csv')
+
+# predictors
+pKaslit = dataACD[,3:7]           # pKa values as predicted by ACD
+pKasliterror = dataACD[,25:29]    # pKa error as predicted by ACD
+chargesA = abs(dataACD[,13:18])   # number of ionized groups (anions)
+chargesB = abs(dataACD[,19:24])   # number of ionized groups (cations)
+charges = chargesA+chargesB                         # absolute charge
+groupsA = (chargesA[,2:5] - chargesA[,1:4])         # acidic group
+groupsB = -(chargesB[,2:5] - chargesB[,1:4])        # basic group
+R = rowSums(pKaslit<14)                             # number of dissociation steps
+logP = dataACD$logP 
+
+data1 = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/1-X_Bridge_Shield_C18_5cm.csv')
+data1$Mod  = as.character(data1$Mod)
+data1$Mod2 = ifelse(data1$Mod=="MeOH",1,2)                        # MeOH = 1, ACN = 2
+
+data1 <- data1[-which(data1$Score<95),]
+
+ID_freq <- as.data.frame(table(data1$METID))
+ID <- ID_freq[which(ID_freq$Freq>42),1]
+data1 <- data1[which(data1$METID %in% ID),]
+rm(ID_freq,ID)
+
+data1$METEXPID = data1$METID*100+data1$EXPID
+data1 <- data1 %>% 
+  group_by(METEXPID) %>%
+  slice(which.max(Score))
+
+data1 <- data1[-which(data1$METID==72),]
+
+data1 = data1[which(data1$METID %in% which(R<=2)),]
+
+data1$column <- rep("XBridge Shield C18",nrow(data1))
+
+data2 = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Terra_C18/skrypt_R/data/1-XTerra_MS_C18.csv')
+data2$Mod  = as.character(data2$Mod)
+data2$Mod2 = ifelse(data2$Mod=="MeOH",1,2)                        # MeOH = 1, ACN = 2
+
+data2 <- data2[-which(data2$Score<95),]
+
+ID_freq <- as.data.frame(table(data2$METID))
+ID <- ID_freq[which(ID_freq$Freq>42),1]
+data2 <- data2[which(data2$METID %in% ID),]
+rm(ID_freq,ID)
+
+data2$METEXPID = data2$METID*100+data2$EXPID
+data2 <- data2 %>% 
+  group_by(METEXPID) %>%
+  slice(which.max(Score))
+
+data2 <- data2[-which(data2$METID==72),]
+
+data2 = data2[which(data2$METID %in% which(R<=2)),]
+
+data2$column <- rep("XTerra C18",nrow(data2))
+
+data <- rbind(data1,data2)
+```
+
+## pKa
+
+```{r, fig.height=10}
+#| echo: false
+#| message: false
+#| warning: false
+# pKaw for analytes detected in both columns
+pKa_1_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("pKaw", names(draws_df_Bridge), value = TRUE))[1:length(unique(data1$METID))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+pKa_1_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("pKaw", names(draws_df_Terra), value = TRUE))[1:length(unique(data2$METID))]], MARGIN = 2, FUN = mean)
+
+pKa_1_Pred_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("pKawPred", names(draws_df_Bridge), value = TRUE))[1:length(unique(data1$METID))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+pKa_1_Pred_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("pKawPred", names(draws_df_Terra), value = TRUE))[1:length(unique(data2$METID))]], MARGIN = 2, FUN = mean)
+
+pKa_2_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("pKaw", names(draws_df_Bridge), value = TRUE))[-c(1:length(unique(data1$METID)))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+pKa_2_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("pKaw", names(draws_df_Terra), value = TRUE))[-c(1:length(unique(data2$METID)))]], MARGIN = 2, FUN = mean)[1:181]
+
+
+plot_pKaw_1 <- ggplot()+geom_point(aes(pKa_1_B_Mean,pKa_1_T_Mean),col="red")+
+  labs(x =expression("Individual predictions of pKa"[w]*" (XBridge Shield C18)"), y = expression("Individual predictions of pKa"[w]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(0,15,by=0.1),seq(0,15,by=0.1)),size=1)
+
+plot_pKaw_2 <- ggplot()+geom_point(aes(pKa_2_B_Mean,pKa_2_T_Mean),col="red")+
+  labs(x =expression("Individual predictions of pKa"[a]*" (XBridge Shield C18)"), y = expression("Individual predictions of pKa"[a]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(0,15,by=0.1),seq(0,15,by=0.1)),size=1)
+
+plot_pKaw_1_Pred <- ggplot()+geom_point(aes(pKa_1_Pred_B_Mean,pKa_1_Pred_T_Mean),col="red")+
+  labs(x =expression("Population predictions of pKa"[w]*" (XBridge Shield C18)"), y = expression("Population predictions of  pKa"[w]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(0,15,by=0.1),seq(0,15,by=0.1)),size=1)
+
+grid.arrange(plot_pKaw_1, plot_pKaw_2,plot_pKaw_1_Pred, ncol=1)
+```
+
+## logkw
+
+```{r, fig.height=10}
+#| echo: false
+#| message: false
+#| warning: false
+# pKaw for analytes detected in both columns
+logkw1_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("logkwx", names(draws_df_Bridge), value = TRUE))[1:length(unique(data1$METID))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+logkw1_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("logkwx", names(draws_df_Terra), value = TRUE))[1:length(unique(data2$METID))]], MARGIN = 2, FUN = mean)
+
+logkw2_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("logkwx", names(draws_df_Bridge), value = TRUE))[-c(1:length(unique(data1$METID)))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+logkw2_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("logkwx", names(draws_df_Terra), value = TRUE))[-c(1:length(unique(data2$METID)))]], MARGIN = 2, FUN = mean)[1:181]
+
+logkw3_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("logkwx", names(draws_df_Bridge), value = TRUE))[-c(length(unique(data1$METID)):(2*length(unique(data1$METID))))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+logkw3_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("logkwx", names(draws_df_Terra), value = TRUE))[-c(length(unique(data1$METID)):(2*length(unique(data1$METID))))]], MARGIN = 2, FUN = mean)[1:181]
+
+
+plot_logkw1 <- ggplot()+geom_point(aes(logkw1_B_Mean,logkw1_T_Mean),col="red")+
+  labs(x =expression("Individual predition of logkw"[1]*" (XBridge Shield C18)"), y = expression("Individual predition of logkw"[1]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+plot_logkw2 <- ggplot()+geom_point(aes(logkw2_B_Mean,logkw2_T_Mean),col="red")+
+  labs(x =expression("Individual predition of logkw"[2]*" (XBridge Shield C18)"), y = expression("Individual predition of logkw"[2]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+plot_logkw3 <- ggplot()+geom_point(aes(logkw3_B_Mean,logkw3_T_Mean),col="red")+
+  labs(x =expression("Individual predition of logkw"[3]*" (XBridge Shield C18)"), y = expression("Individual predition of logkw"[3]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+grid.arrange(plot_logkw1, plot_logkw2,plot_logkw3, ncol=1)
+```
+
+
+
+
+
+
+```{r, fig.height=10}
+#| echo: false
+#| message: false
+#| warning: false
+# pKaw for analytes detected in both columns
+logkw1_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("logkwxPred", names(draws_df_Bridge), value = TRUE))[1:length(unique(data1$METID))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+logkw1_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("logkwxPred", names(draws_df_Terra), value = TRUE))[1:length(unique(data2$METID))]], MARGIN = 2, FUN = mean)
+
+logkw2_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("logkwxPred", names(draws_df_Bridge), value = TRUE))[-c(1:length(unique(data1$METID)))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+logkw2_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("logkwxPred", names(draws_df_Terra), value = TRUE))[-c(1:length(unique(data2$METID)))]], MARGIN = 2, FUN = mean)[1:181]
+
+logkw3_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("logkwxPred", names(draws_df_Bridge), value = TRUE))[-c(length(unique(data1$METID)):(2*length(unique(data1$METID))))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+logkw3_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("logkwxPred", names(draws_df_Terra), value = TRUE))[-c(length(unique(data1$METID)):(2*length(unique(data1$METID))))]], MARGIN = 2, FUN = mean)[1:181]
+
+
+plot_logkw1 <- ggplot()+geom_point(aes(logkw1_B_Mean,logkw1_T_Mean),col="red")+
+  labs(x =expression("Population predition of logkw"[1]*" (XBridge Shield C18)"), y = expression("Population predition of logkw"[1]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+plot_logkw2 <- ggplot()+geom_point(aes(logkw2_B_Mean,logkw2_T_Mean),col="red")+
+  labs(x =expression("Population predition of logkw"[2]*" (XBridge Shield C18)"), y = expression("Population predition of logkw"[2]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+plot_logkw3 <- ggplot()+geom_point(aes(logkw3_B_Mean,logkw3_T_Mean),col="red")+
+  labs(x =expression("Population predition of logkw"[3]*" (XBridge Shield C18)"), y = expression("Population predition of logkw"[3]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+grid.arrange(plot_logkw1, plot_logkw2,plot_logkw3, ncol=1)
+```
+
+
+
+
+
+## S1m
+
+```{r, fig.height=10}
+#| echo: false
+#| message: false
+#| warning: false
+# pKaw for analytes detected in both columns
+S1mx1_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("S1mx", names(draws_df_Bridge), value = TRUE))[1:length(unique(data1$METID))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+S1mx1_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("S1mx", names(draws_df_Terra), value = TRUE))[1:length(unique(data2$METID))]], MARGIN = 2, FUN = mean)
+
+S1mx2_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("S1mx", names(draws_df_Bridge), value = TRUE))[-c(1:length(unique(data1$METID)))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+S1mx2_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("S1mx", names(draws_df_Terra), value = TRUE))[-c(1:length(unique(data2$METID)))]], MARGIN = 2, FUN = mean)[1:181]
+
+S1mx3_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("S1mx", names(draws_df_Bridge), value = TRUE))[-c(length(unique(data1$METID)):(2*length(unique(data1$METID))))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+S1mx3_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("S1mx", names(draws_df_Terra), value = TRUE))[-c(length(unique(data1$METID)):(2*length(unique(data1$METID))))]], MARGIN = 2, FUN = mean)[1:181]
+
+
+plot_S1mx1 <- ggplot()+geom_point(aes(logkw1_B_Mean,logkw1_T_Mean),col="red")+
+  labs(x =expression("Individual predition of S1m"[1]*" (XBridge Shield C18)"), y = expression("Individual predition of S1m"[1]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+plot_S1mx2 <- ggplot()+geom_point(aes(logkw2_B_Mean,logkw2_T_Mean),col="red")+
+  labs(x =expression("Individual predition of S1m"[2]*" (XBridge Shield C18)"), y = expression("Individual predition of S1m"[2]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+plot_S1mx3 <- ggplot()+geom_point(aes(logkw3_B_Mean,logkw3_T_Mean),col="red")+
+  labs(x =expression("Individual predition of S1m"[3]*" (XBridge Shield C18)"), y = expression("Individual predition of S1m"[3]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+grid.arrange(plot_S1mx1, plot_S1mx2,plot_S1mx3, ncol=1)
+```
+```{r, fig.height=10}
+#| echo: false
+#| message: false
+#| warning: false
+# pKaw for analytes detected in both columns
+S1mx1_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("S1mxPred", names(draws_df_Bridge), value = TRUE))[1:length(unique(data1$METID))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+S1mx1_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("S1mxPred", names(draws_df_Terra), value = TRUE))[1:length(unique(data2$METID))]], MARGIN = 2, FUN = mean)
+
+S1mx2_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("S1mxPred", names(draws_df_Bridge), value = TRUE))[-c(1:length(unique(data1$METID)))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+S1mx2_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("S1mxPred", names(draws_df_Terra), value = TRUE))[-c(1:length(unique(data2$METID)))]], MARGIN = 2, FUN = mean)[1:181]
+
+S1mx3_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("S1mxPred", names(draws_df_Bridge), value = TRUE))[-c(length(unique(data1$METID)):(2*length(unique(data1$METID))))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+S1mx3_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("S1mxPred", names(draws_df_Terra), value = TRUE))[-c(length(unique(data1$METID)):(2*length(unique(data1$METID))))]], MARGIN = 2, FUN = mean)[1:181]
+
+
+plot_S1mx1 <- ggplot()+geom_point(aes(logkw1_B_Mean,logkw1_T_Mean),col="red")+
+  labs(x =expression("Population predition of S1m"[1]*" (XBridge Shield C18)"), y = expression("Population predition of S1m"[1]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+plot_S1mx2 <- ggplot()+geom_point(aes(logkw2_B_Mean,logkw2_T_Mean),col="red")+
+  labs(x =expression("Population predition of S1m"[2]*" (XBridge Shield C18)"), y = expression("Population predition of S1m"[2]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+plot_S1mx3 <- ggplot()+geom_point(aes(logkw3_B_Mean,logkw3_T_Mean),col="red")+
+  labs(x =expression("Population predition of S1m"[3]*" (XBridge Shield C18)"), y = expression("Population predition of S1m"[3]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+grid.arrange(plot_S1mx1, plot_S1mx2,plot_S1mx3, ncol=1)
+```
+## S1a
+
+```{r, fig.height=10}
+#| echo: false
+#| message: false
+#| warning: false
+# pKaw for analytes detected in both columns
+S1ax1_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("S1ax", names(draws_df_Bridge), value = TRUE))[1:length(unique(data1$METID))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+S1ax1_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("S1ax", names(draws_df_Terra), value = TRUE))[1:length(unique(data2$METID))]], MARGIN = 2, FUN = mean)
+
+S1ax2_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("S1ax", names(draws_df_Bridge), value = TRUE))[-c(1:length(unique(data1$METID)))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+S1ax2_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("S1ax", names(draws_df_Terra), value = TRUE))[-c(1:length(unique(data2$METID)))]], MARGIN = 2, FUN = mean)[1:181]
+
+S1ax3_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("S1ax", names(draws_df_Bridge), value = TRUE))[-c(length(unique(data1$METID)):(2*length(unique(data1$METID))))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+S1ax3_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("S1ax", names(draws_df_Terra), value = TRUE))[-c(length(unique(data1$METID)):(2*length(unique(data1$METID))))]], MARGIN = 2, FUN = mean)[1:181]
+
+
+plot_S1ax1 <- ggplot()+geom_point(aes(logkw1_B_Mean,logkw1_T_Mean),col="red")+
+  labs(x =expression("Individual predition of S1a"[1]*" (XBridge Shield C18)"), y = expression("Individual predition of S1a"[1]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+plot_S1ax2 <- ggplot()+geom_point(aes(logkw2_B_Mean,logkw2_T_Mean),col="red")+
+  labs(x =expression("Individual predition of S1a"[2]*" (XBridge Shield C18)"), y = expression("Individual predition of S1a"[2]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+plot_S1ax3 <- ggplot()+geom_point(aes(logkw3_B_Mean,logkw3_T_Mean),col="red")+
+  labs(x =expression("Individual predition of S1a"[3]*" (XBridge Shield C18)"), y = expression("Individual predition of S1a"[3]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+grid.arrange(plot_S1ax1, plot_S1ax2,plot_S1ax3, ncol=1)
+```
+```{r, fig.height=10}
+#| echo: false
+#| message: false
+#| warning: false
+# pKaw for analytes detected in both columns
+S1ax1_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("S1axPred", names(draws_df_Bridge), value = TRUE))[1:length(unique(data1$METID))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+S1ax1_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("S1axPred", names(draws_df_Terra), value = TRUE))[1:length(unique(data2$METID))]], MARGIN = 2, FUN = mean)
+
+S1ax2_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("S1axPred", names(draws_df_Bridge), value = TRUE))[-c(1:length(unique(data1$METID)))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+S1ax2_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("S1axPred", names(draws_df_Terra), value = TRUE))[-c(1:length(unique(data2$METID)))]], MARGIN = 2, FUN = mean)[1:181]
+
+S1ax3_B_Mean <- apply(draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("S1axPred", names(draws_df_Bridge), value = TRUE))[-c(length(unique(data1$METID)):(2*length(unique(data1$METID))))]], MARGIN = 2, FUN = mean)[which(unique(data1$METID) %in% unique(data2$METID))]
+
+S1ax3_T_Mean <- apply(draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("S1axPred", names(draws_df_Terra), value = TRUE))[-c(length(unique(data1$METID)):(2*length(unique(data1$METID))))]], MARGIN = 2, FUN = mean)[1:181]
+
+
+plot_S1ax1 <- ggplot()+geom_point(aes(logkw1_B_Mean,logkw1_T_Mean),col="red")+
+  labs(x =expression("Population predition of S1a"[1]*" (XBridge Shield C18)"), y = expression("Population predition of S1a"[1]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+plot_S1ax2 <- ggplot()+geom_point(aes(logkw2_B_Mean,logkw2_T_Mean),col="red")+
+  labs(x =expression("Population predition of S1a"[2]*" (XBridge Shield C18)"), y = expression("Population predition of S1a"[2]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+plot_S1ax3 <- ggplot()+geom_point(aes(logkw3_B_Mean,logkw3_T_Mean),col="red")+
+  labs(x =expression("Population predition of S1a"[3]*" (XBridge Shield C18)"), y = expression("Population predition of S1a"[3]*" (XTerra C18)"))+theme(axis.title = element_text(size = 10))+ 
+  #xlim(0,350)+ylim(0,350) + 
+    geom_line(aes(seq(-5,10,by=0.1),seq(-5,10,by=0.1)),size=1)
+
+grid.arrange(plot_S1ax1, plot_S1ax2,plot_S1ax3, ncol=1)
+```
+

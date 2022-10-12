@@ -1,0 +1,165 @@
+# Comparison of population parameter values
+
+```{r}
+#| echo: false
+#| message: false
+library(pracma)
+library(dplyr)
+library(ggplot2)
+require(gridExtra)
+library(GGally)
+library(cmdstanr)
+library(rstan)
+library(knitr)
+library(reshape2)
+library(bayesplot)
+library(posterior)
+
+set.seed(10271998) ## not required but assures repeatable results
+```
+
+
+```{r, fig.height=16}
+#| echo: false
+#| message: false
+#| warning: false
+fit_Combined <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_1.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_2.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_3.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_4.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_5.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_6.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_7.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_8.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_9.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_10.csv'))
+
+draws_df_Combined <- fit_Combined$draws(format = "df")
+
+parameters <- c("logkwHat1","logkwHat2",
+                "S1mHat1","S1mHat2","S1aHat1","S1aHat2",
+                "S2mHat1","S2mHat2","S2aHat1","S2aHat2",
+                "dlogkwHat1[1]","dlogkwHat2[1]","dlogkwHat1[2]","dlogkwHat2[2]",
+                "dSmHat1[1]","dSmHat2[1]","dSmHat1[2]","dSmHat2[2]",
+                "dSaHat1[1]","dSaHat2[1]","dSaHat1[2]","dSaHat2[2]",
+                "dlogkTHat1","dlogkTHat2",
+                "beta1[1]","beta2[1]","beta1[2]","beta2[2]","beta1[3]","beta2[3]",
+                "alphaAHat1[1]","alphaAHat2[1]","alphaAHat1[2]","alphaAHat2[2]",
+                "alphaBHat1[1]","alphaBHat2[1]","alphaBHat1[2]","alphaBHat2[2]",
+                "omega1[1]","omega2[1]","omega1[2]","omega2[2]","omega1[3]","omega2[3]",
+                "omegadlogkT1","omegadlogkT2",
+                "kappa1[1]","kappa2[1]","kappa1[2]","kappa2[2]","kappa1[3]","kappa2[3]",
+                "tau[1]","tau[2]",
+                "apH1[1]","apH2[1]","apH1[2]","apH2[2]",
+                "msigma1","msigma2",
+                "ssigma1","ssigma2")
+
+data_to_plot_par_Combined <- draws_df_Combined[,which(colnames(draws_df_Combined) %in% parameters)]
+
+lab <- c(expression(theta["logkwN,1"]),expression(theta["logkwN,2"]),
+         expression(theta["S1mN,1"]),expression(theta["S1mN,2"]),expression(theta["S1aN,1"]),expression(theta["S1aN,2"]),
+         expression(theta["S2m,1"]),expression(theta["S2m,2"]),expression(theta["S2a,1"]),expression(theta["S2a,2"]),
+         expression(theta["dlogkwA,1"]),expression(theta["dlogkwA,2"]),expression(theta["dlogkwB,1"]),expression(theta["dlogkwB,2"]),
+         expression(theta["dSmA,1"]),expression(theta["dSmA,2"]),expression(theta["dSmB,1"]),expression(theta["dSmB,2"]),
+         expression(theta["dSaA,1"]),expression(theta["dSaA,2"]),expression(theta["dSaB,1"]),expression(theta["dSaB,2"]),
+         expression(theta["dlogkT,1"]),expression(theta["dlogkT,2"]),
+         expression(beta["logkwN,1"]),expression(beta["logkwN,2"]),expression(beta["S1mN,1"]),expression(beta["S1mN,2"]),expression(beta["S1aN,1"]),expression(beta["S1aN,2"]),
+         expression(alpha["mA,1"]),expression(alpha["mA,2"]),expression(alpha["aA,1"]),expression(alpha["aA,2"]),
+         expression(alpha["mB,1"]),expression(alpha["mB,2"]),expression(alpha["aB,1"]),expression(alpha["aB,2"]),
+         expression(omega["logkwN,1"]),expression(omega["logkwN,2"]),expression(omega["S1mN,1"]),expression(omega["logkwN,2"]),expression(omega["S1aN,1"]),expression(omega["S1aN,2"]),
+         expression(omega["dlogkT,1"]),expression(omega["dlogkT,2"]),
+         expression(kappa["logkwN,1"]),expression(kappa["logkwN,2"]),expression(kappa["S1mN,1"]),expression(kappa["logkwN,2"]),expression(kappa["S1aN,1"]),expression(kappa["S1aN,2"]),
+         expression(tau["m"]),expression(tau["a"]),
+         expression(apH["A,1"]),expression(apH["A,2"]),expression(apH["B,1"]),expression(apH["B,2"]),
+         expression(m[sigma,",1"]),expression(m[sigma,",2"]),
+         expression(s[sigma,",1"]),expression(s[sigma,",2"]))
+ 
+library(reshape2)
+pp_C <- melt(data_to_plot_par_Combined)
+pp_C[,1] <- ordered(pp_C[,1],parameters) 
+#pp_B$Column <- rep("XBridge Shield C18",nrow(pp_B))
+ggplot(data = pp_C, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable))+ coord_flip()+
+  theme(legend.position = "none")+ scale_x_discrete(labels=rev(lab),limits=rev)+
+  labs(y="Marginal posterior distributions",x="")
+```
+
+```{r, fig.height=16}
+#| echo: false
+#| message: false
+#| warning: false
+parameters1 <- c("logkwHat1","logkwHat2",
+                "S1mHat1","S1mHat2","S1aHat1","S1aHat2",
+                "S2mHat1","S2mHat2","S2aHat1","S2aHat2",
+                "dlogkwHat1[1]","dlogkwHat2[1]","dlogkwHat1[2]","dlogkwHat2[2]",
+                "dSmHat1[1]","dSmHat2[1]","dSmHat1[2]","dSmHat2[2]",
+                "dSaHat1[1]","dSaHat2[1]","dSaHat1[2]","dSaHat2[2]",
+                "dlogkTHat1","dlogkTHat2",
+                "beta1[1]","beta2[1]","beta1[2]","beta2[2]","beta1[3]","beta2[3]",
+                "alphaAHat1[1]","alphaAHat2[1]","alphaAHat1[2]","alphaAHat2[2]",
+                "alphaBHat1[1]","alphaBHat2[1]","alphaBHat1[2]","alphaBHat2[2]",
+                "omega1[1]","omega2[1]","omega1[2]","omega2[2]","omega1[3]","omega2[3]",
+                "omegadlogkT1","omegadlogkT2",
+                "kappa1[1]","kappa2[1]","kappa1[2]","kappa2[2]","kappa1[3]","kappa2[3]",
+                "apH1[1]","apH2[1]","apH1[2]","apH2[2]",
+                "msigma1","msigma2",
+                "ssigma1","ssigma2")
+
+data_to_plot_par_Combined1 <- draws_df_Combined[,which(colnames(draws_df_Combined) %in% parameters1)]
+
+pp_Com <- melt(data_to_plot_par_Combined1)
+
+pp_Com$Column <-c(rep("XBridge Shield C18",120000),rep("XTerra C18",120000))
+
+parameters_names <- c("logkwHat","S1mHat","S1aHat","S2mHat","S2aHat","dlogkwHat[1]","dlogkwHat[2]","dSmHat[1]","dSmHat[2]",
+"dSaHat[1]","dSaHat[2]","dlogkTHat","beta[1]","beta[2]","beta[3]","alphaAHat[1]","alphaAHat[2]",
+"alphaBHat[1]","alphaBHat[2]","omega[1]","omega[2]","omega[3]","omegadlogkT","kappa[1]","kappa[2]","kappa[3]",
+"apH[1]","apH[2]","msigma","ssigma")
+
+pp_Com$variable1 <- rep(parameters_names,times=2,each=4000)
+
+pp_Com$variable1 <- ordered(pp_Com$variable1,parameters_names) 
+
+lab_names <- list(
+  	'logkwHat'=expression(theta["logkwN"]),
+  	"S1mHat"=expression(theta["S1mN"]),
+  	"S1aHat"=expression(theta["S1aN"]),
+    "S2mHat"=expression(theta["S2m"]),
+	  "S2aHat"=expression(theta["S2a"]),
+    "dlogkwHat[1]"=expression(theta["dlogkwA"]),
+	  "dlogkwHat[2]"=expression(theta["dlogkwB"]),
+    "dSmHat[1]"=expression(theta["dSmA"]),
+	  "dSmHat[2]"=expression(theta["dSmB"]),
+    "dSaHat[1]"=expression(theta["dSaA"]),
+	  "dSaHat[2]"=expression(theta["dSaB"]),
+    "dlogkTHat"=expression(theta["dlogkT"]),
+    "beta[1]"=expression(beta["logkwN"]),
+	  "beta[2]"=expression(beta["S1mN"]),
+    "beta[3]"=expression(beta["S1aN"]),
+    "alphaAHat[1]"=expression(alpha["mA"]),
+	  "alphaAHat[2]"=expression(alpha["aA"]),
+    "alphaBHat[1]"=expression(alpha["mB"]),
+	  "alphaBHat[2]"=expression(alpha["aB"]),
+    "omega[1]"=expression(omega["logkwN"]),
+	  "omega[2]"=expression(omega["S1mN"]),
+    "omega[3]"=expression(omega["S1aN"]),
+	  "omegadlogkT"=expression(omega["dlogkT"]),
+    "kappa[1]"=expression(kappa["logkwN"]),
+	  "kappa[2]"=expression(kappa["S1mN"]),
+    "kappa[3]"=expression(kappa["S1aN"]),
+    "apH[1]"=expression(apH["A"]),
+	  "apH[2]"=expression(apH["B"]),
+    "msigma"=expression(m[sigma]),
+	  "ssigma"=expression(s[sigma])
+)
+
+lab_labeller <- function(variable,value){
+  return(lab_names[value])
+}
+
+ggplot(data = pp_Com, aes(x=variable1, y=value)) + geom_boxplot(aes(fill=Column))+ coord_flip()+
+  #theme(legend.position = "none")+ 
+  scale_x_discrete(labels=lab_labeller())+
+  labs(y="Marginal posterior distributions",x="")+facet_wrap(~variable1, labeller=lab_labeller,scales = "free", nrow = 15)
+```
+
+

@@ -1,6 +1,7 @@
-# Stan code 
+# Stan code
 
 Stan code for model:
+
 ```{r}
 #| echo: false
 writeLines(readLines("C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/hplc-gra-redsum_qsrr_04_10.stan"))

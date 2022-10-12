@@ -17,6 +17,8 @@ book:
     - part: Model_2.qmd
       chapters:
       - Model_2_a.qmd
+      - Model_2_b.qmd
+      - Model_2_c.qmd
     #  - intro.qmd
     #  - summary.qmd
     #  - references.qmd

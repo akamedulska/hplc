@@ -1,6 +1,6 @@
 # Columns: XBridge Shield and XTerra {.unnumbered}
 
-A comparison of the two series of columns can be found on the website: <https://www.waters.com/nextgen/us/en/products/columns/compare-columns.html?productname=xbridge-columns%2Cxterra-columns>.
+A comparison of the two series of columns can be found on the websites: <https://link.springer.com/article/10.1365/s10337-007-0355-y> <https://www.waters.com/nextgen/us/en/products/columns/compare-columns.html?productname=xbridge-columns%2Cxterra-columns> and <https://support.waters.com/KB_Chem/Columns/WKB45632_What_is_the_difference_between_Xterra_and_XBridge_columns>.
 
 Data of the 300 small molecules from the XBrigde Shield C18 and XTerra C18 columns are generally available at the following links: [XBridge Shield C18](https://osf.io/zqtj7/?view_only=074c5324c26e44529273523b280ecb05) and [XTerra C18](https://osf.io/qbv7j/?view_only=c5431b9e9f68423ab665f5f5b2b4606f).
 

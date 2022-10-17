@@ -61,7 +61,7 @@ library(reshape2)
 pp_B <- melt(data_to_plot_par_Bridge)
 pp_B[,1] <- ordered(pp_B[,1],parameters) 
 pp_B$Column <- rep("XBridge Shield C18",nrow(pp_B))
-ggplot(data = pp_B, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable))+ coord_flip()+
+ggplot(data = pp_B, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable),outlier.shape=NA)+ coord_flip()+
   theme(legend.position = "none")+ scale_x_discrete(labels=rev(lab),limits=rev)+
   labs(y="Marginal posterior distributions",x="")
 ```
@@ -109,7 +109,7 @@ library(reshape2)
 pp_T <- melt(data_to_plot_par_Terra)
 pp_T[,1] <- ordered(pp_T[,1],parameters) 
 pp_T$Column <- rep("XTerra C18",nrow(pp_T))
-ggplot(data = pp_T, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable))+ coord_flip()+
+ggplot(data = pp_T, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable),outlier.shape=NA)+ coord_flip()+
   theme(legend.position = "none")+ scale_x_discrete(labels=rev(lab),limits=rev)+
   labs(y="Marginal posterior distributions",x="")
 
@@ -122,7 +122,7 @@ ggplot(data = pp_T, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable))
 #| message: false
 #| warning: false
 pp <- rbind(pp_B,pp_T)
-ggplot(data = pp, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Column))+ coord_flip()+
+ggplot(data = pp, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Column),outlier.shape=NA)+ coord_flip()+
   #theme(legend.position = "none")+ 
   scale_x_discrete(labels=rev(lab),limits=rev)+
   labs(y="Marginal posterior distributions",x="")
@@ -171,7 +171,7 @@ lab_labeller <- function(variable,value){
   return(lab_names[value])
 }
 
-ggplot(data = pp, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Column))+ coord_flip()+
+ggplot(data = pp, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Column),outlier.shape=NA)+ coord_flip()+
   #theme(legend.position = "none")+ 
   scale_x_discrete(labels=lab_labeller())+
   labs(y="Marginal posterior distributions",x="")+facet_wrap(~variable, labeller=lab_labeller,scales = "free", nrow = 16)

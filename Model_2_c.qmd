@@ -78,7 +78,7 @@ library(reshape2)
 pp_C <- melt(data_to_plot_par_Combined)
 pp_C[,1] <- ordered(pp_C[,1],parameters) 
 #pp_B$Column <- rep("XBridge Shield C18",nrow(pp_B))
-ggplot(data = pp_C, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable))+ coord_flip()+
+ggplot(data = pp_C, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable),outlier.shape=NA)+ coord_flip()+
   theme(legend.position = "none")+ scale_x_discrete(labels=rev(lab),limits=rev)+
   labs(y="Marginal posterior distributions",x="")
 ```
@@ -156,10 +156,30 @@ lab_labeller <- function(variable,value){
   return(lab_names[value])
 }
 
-ggplot(data = pp_Com, aes(x=variable1, y=value)) + geom_boxplot(aes(fill=Column))+ coord_flip()+
+ggplot(data = pp_Com, aes(x=variable1, y=value)) + geom_boxplot(aes(fill=Column),outlier.shape=NA)+ coord_flip()+
   #theme(legend.position = "none")+ 
   scale_x_discrete(labels=lab_labeller())+
   labs(y="Marginal posterior distributions",x="")+facet_wrap(~variable1, labeller=lab_labeller,scales = "free", nrow = 15)
 ```
 
+```{r, fig.height=16}
+variable <- rep(parameters_names,each=4000)
+value <- pp_Com[120001:240000,2]-pp_Com[1:120000,2]
+pp_Com_dif <- as.data.frame(cbind(variable,value))
+pp_Com_dif[,1] <- ordered(pp_Com_dif[,1],parameters_names) 
+pp_Com_dif[,2] <- as.numeric(pp_Com_dif[,2])
+```
+## Distribution of differences in parameters between columns 
 
+```{r}
+ggplot(data = pp_Com_dif, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable),outlier.shape=NA)+ coord_flip()+
+  theme(legend.position = "none")+ scale_x_discrete(labels=lab_labeller())+
+  labs(y="Marginal posterior distributions",x="")
+```
+
+```{r, fig.height=16}
+ggplot(data = pp_Com_dif, aes(x=variable, y=value)) + geom_boxplot(outlier.shape=NA)+ coord_flip()+
+  #theme(legend.position = "none")+ 
+  scale_x_discrete(labels=lab_labeller())+
+  labs(y="Marginal posterior distributions",x="")+facet_wrap(~variable, labeller=lab_labeller,scales = "free", nrow = 15)
+```

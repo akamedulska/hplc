@@ -163,6 +163,9 @@ ggplot(data = pp_Com, aes(x=variable1, y=value)) + geom_boxplot(aes(fill=Column)
 ```
 
 ```{r, fig.height=16}
+#| echo: false
+#| message: false
+#| warning: false
 variable <- rep(parameters_names,each=4000)
 value <- pp_Com[120001:240000,2]-pp_Com[1:120000,2]
 pp_Com_dif <- as.data.frame(cbind(variable,value))
@@ -172,12 +175,18 @@ pp_Com_dif[,2] <- as.numeric(pp_Com_dif[,2])
 ## Distribution of differences in parameters between columns 
 
 ```{r}
+#| echo: false
+#| message: false
+#| warning: false
 ggplot(data = pp_Com_dif, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable),outlier.shape=NA)+ coord_flip()+
-  theme(legend.position = "none")+ scale_x_discrete(labels=lab_labeller())+
+  theme(legend.position = "none")+ #scale_x_discrete(labels=lab_labeller())+
   labs(y="Marginal posterior distributions",x="")
 ```
 
 ```{r, fig.height=16}
+#| echo: false
+#| message: false
+#| warning: false
 ggplot(data = pp_Com_dif, aes(x=variable, y=value)) + geom_boxplot(outlier.shape=NA)+ coord_flip()+
   #theme(legend.position = "none")+ 
   scale_x_discrete(labels=lab_labeller())+

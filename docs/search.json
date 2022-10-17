@@ -116,6 +116,6 @@
     "href": "Model_2_c.html#distribution-of-differences-in-parameters-between-columns",
     "title": "7  Comparison of population parameter values",
     "section": "7.1 Distribution of differences in parameters between columns",
-    "text": "7.1 Distribution of differences in parameters between columns\n\nggplot(data = pp_Com_dif, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable),outlier.shape=NA)+ coord_flip()+\n  theme(legend.position = \"none\")+ scale_x_discrete(labels=lab_labeller())+\n  labs(y=\"Marginal posterior distributions\",x=\"\")\n\n\n\n\n\nggplot(data = pp_Com_dif, aes(x=variable, y=value)) + geom_boxplot(outlier.shape=NA)+ coord_flip()+\n  #theme(legend.position = \"none\")+ \n  scale_x_discrete(labels=lab_labeller())+\n  labs(y=\"Marginal posterior distributions\",x=\"\")+facet_wrap(~variable, labeller=lab_labeller,scales = \"free\", nrow = 15)\n\nWarning: The labeller API has been updated. Labellers taking `variable` and\n`value` arguments are now deprecated. See labellers documentation."
+    "text": "7.1 Distribution of differences in parameters between columns"
   }
 ]

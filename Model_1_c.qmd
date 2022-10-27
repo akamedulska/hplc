@@ -24,10 +24,16 @@ set.seed(10271998) ## not required but assures repeatable results
 #| echo: false
 #| message: false
 #| warning: false
-fit_Bridge <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_1.csv',
-                                         'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_2.csv',
-                                         'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_3.csv',
-                                         'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_4.csv'))
+#fit_Bridge <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_1.csv',
+#                                         'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_2.csv',
+#                                         'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_3.csv',
+#                                         'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/TASK/output_4.csv'))
+
+fit_Bridge <- cmdstanr::as_cmdstan_fit(
+  c('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/csv_files/csv/Feq4Okp2JaerpsFyxOxYk2-output-1.csv',
+    'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/csv_files/csv/Feq4Okp2JaerpsFyxOxYk2-output-2.csv',
+    'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/csv_files/csv/Feq4Okp2JaerpsFyxOxYk2-output-3.csv',
+    'C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/csv_files/csv/Feq4Okp2JaerpsFyxOxYk2-output-4.csv'))
 
 draws_df_Bridge <- fit_Bridge$draws(format = "df")
 
@@ -175,4 +181,108 @@ ggplot(data = pp, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Column),outl
   #theme(legend.position = "none")+ 
   scale_x_discrete(labels=lab_labeller())+
   labs(y="Marginal posterior distributions",x="")+facet_wrap(~variable, labeller=lab_labeller,scales = "free", nrow = 16)
+```
+## Parameters related to functional groups
+
+
+### XBridge Shield C18 
+```{r, fig.height=14}
+#| echo: false
+#| message: false
+#| warning: false
+functional_groups = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/6-checkmol-functional-groups.csv')
+functional_groups_names = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/Legend-checkmol-functional-group-names.csv')
+
+functional_groups=functional_groups[,2:ncol(functional_groups)]
+
+# combine nr of caroboxylic acid and carboxyalic acid salt functional groups
+functional_groups[,76]=functional_groups[,76]+functional_groups[,77]       
+functional_groups[which(functional_groups[,202]>5.5),202] = 6; # heterocyclic compounds with more than 6 heterocycles are treated as if they have six
+
+########
+idx_included <- c(4,5,9,11,14,18,19,20,21,24,26,29,30,31,32,33,34,38,39,40,41,45,49,50,52,53,54,56,57,59,63,64,68,69,70,71,76,78,79,81,82,83,84,85,88,90,106,108,113,114,115,127,131,133,137,138,150,164,166,167)
+functional_groups_names <- functional_groups_names[idx_included,]
+functional_groups <- functional_groups[,idx_included]
+########
+
+lab_names <- list(
+  	'pilogkw'=expression(pi["logkwN"]),
+  	"piS1m"=expression(pi["S1mN"]),
+	  "piS1a"=expression(pi["S1aN"])
+)
+
+lab_labeller <- function(variable,value){
+  return(lab_names[value])
+}
+
+```
+
+```{r, fig.height=14,fig.width=14}
+#| echo: false
+#| message: false
+#| warning: false
+ 
+data_to_plot_par_pilogkw_Bridge <- draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("pilogkw", names(draws_df_Bridge), value = TRUE))]
+data_to_plot_par_piS1m_Bridge <- draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("piS1m", names(draws_df_Bridge), value = TRUE))]
+data_to_plot_par_piS1a_Bridge <- draws_df_Bridge[,which(colnames(draws_df_Bridge) %in% grep("piS1a", names(draws_df_Bridge), value = TRUE))]
+
+pp_B_pilogkw <- melt(data_to_plot_par_pilogkw_Bridge)
+pp_B_pilogkw[,1] <- ordered(pp_B_pilogkw[,1]) 
+pp_B_S1m <- melt(data_to_plot_par_piS1m_Bridge)
+pp_B_S1m[,1] <- ordered(pp_B_S1m[,1]) 
+pp_B_S1a <- melt(data_to_plot_par_piS1a_Bridge)
+pp_B_S1a[,1] <- ordered(pp_B_S1a[,1]) 
+
+pp_B_pi <- rbind(pp_B_pilogkw,pp_B_S1m,pp_B_S1a)
+pp_B_pi$parameter <- rep(c("pilogkw","piS1m","piS1a"),each=4000*60)
+pp_B_pi$parameter_group <- rep(rep(functional_groups_names[,2],each=4000),3)
+pp_B_pi$parameter <- ordered(pp_B_pi$parameter)
+
+ggplot(data = pp_B_pi, aes(x=variable, y=value)) + geom_boxplot(aes(fill=parameter_group),outlier.shape=NA)+ coord_flip()+
+  theme(legend.position = "none")+ 
+  scale_x_discrete(labels=functional_groups_names[,2])+
+  labs(y="Marginal posterior distributions",x="")+facet_wrap(~parameter, labeller=lab_labeller,scales = "free_y", nrow = 1)
+```
+
+### XTerra C18
+```{r, fig.height=14,fig.width=14}
+#| echo: false
+#| message: false
+#| warning: false
+
+data_to_plot_par_pilogkw_Terra <- draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("pilogkw", names(draws_df_Terra), value = TRUE))]
+data_to_plot_par_piS1m_Terra <- draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("piS1m", names(draws_df_Terra), value = TRUE))]
+data_to_plot_par_piS1a_Terra <- draws_df_Terra[,which(colnames(draws_df_Terra) %in% grep("piS1a", names(draws_df_Terra), value = TRUE))]
+
+pp_T_pilogkw <- melt(data_to_plot_par_pilogkw_Terra)
+pp_T_pilogkw[,1] <- ordered(pp_T_pilogkw[,1]) 
+pp_T_S1m <- melt(data_to_plot_par_piS1m_Terra)
+pp_T_S1m[,1] <- ordered(pp_T_S1m[,1]) 
+pp_T_S1a <- melt(data_to_plot_par_piS1a_Terra)
+pp_T_S1a[,1] <- ordered(pp_T_S1a[,1]) 
+
+pp_T_pi <- rbind(pp_T_pilogkw,pp_T_S1m,pp_T_S1a)
+pp_T_pi$parameter <- rep(c("pilogkw","piS1m","piS1a"),each=4000*60)
+pp_T_pi$parameter_group <- rep(rep(functional_groups_names[,2],each=4000),3)
+pp_T_pi$parameter <- ordered(pp_T_pi$parameter)
+
+ggplot(data = pp_T_pi, aes(x=variable, y=value)) + geom_boxplot(aes(fill=parameter_group),outlier.shape=NA)+ coord_flip()+
+  theme(legend.position = "none")+ 
+  scale_x_discrete(labels=functional_groups_names[,2])+
+  labs(y="Marginal posterior distributions",x="")+facet_wrap(~parameter, labeller=lab_labeller,scales = "free_y", nrow = 1)
+```
+
+### Comparison of the columns
+
+```{r, fig.height=20,fig.width=14}
+#| echo: false
+#| message: false
+#| warning: false
+pp_all_pi <- rbind(pp_B_pi,pp_T_pi)
+pp_all_pi$Column <- rep(c("XBridge Shield C18","XTerra C18"),each=4000*60)
+
+ggplot(data = pp_all_pi, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Column),outlier.shape=NA)+ coord_flip()+
+  theme(legend.position = "none")+ 
+  scale_x_discrete(labels=functional_groups_names[,2])+
+  labs(y="Marginal posterior distributions",x="")+facet_wrap(~parameter, labeller=lab_labeller,scales = "free_y", nrow = 1)
 ```

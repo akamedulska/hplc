@@ -2,16 +2,16 @@
 
 ```{r}
 #| echo: false
-fit_Combined <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_1.csv',
-                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_2.csv',
-                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_3.csv',
-                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_4.csv',
-                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_5.csv',
-                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_6.csv',
-                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_7.csv',
-                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_8.csv',
-                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_9.csv',
-                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_10.csv'))
+fit_Combined <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK_1/output_1.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK_1/output_2.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK_1/output_3.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK_1/output_4.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK_1/output_5.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK_1/output_6.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK_1/output_7.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK_1/output_8.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK_1/output_9.csv',
+                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK_1/output_10.csv'))
 
 fit_Combined$print(c("logkwHat1","logkwHat2","S1mHat1","S1mHat2","S1aHat1","S1aHat2", 
             "dlogkwHat1","dlogkwHat2", "dSmHat1","dSmHat2", "dSaHat1","dSaHat2", "S2mHat1","S2mHat2", "S2aHat1","S2aHat2",

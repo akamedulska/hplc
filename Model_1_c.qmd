@@ -217,7 +217,7 @@ lab_labeller <- function(variable,value){
 
 ```
 
-```{r, fig.height=14,fig.width=14}
+```{r, fig.height=14}
 #| echo: false
 #| message: false
 #| warning: false
@@ -238,14 +238,14 @@ pp_B_pi$parameter <- rep(c("pilogkw","piS1m","piS1a"),each=4000*60)
 pp_B_pi$parameter_group <- rep(rep(functional_groups_names[,2],each=4000),3)
 pp_B_pi$parameter <- ordered(pp_B_pi$parameter)
 
-ggplot(data = pp_B_pi, aes(x=variable, y=value)) + geom_boxplot(aes(fill=parameter_group),outlier.shape=NA)+ coord_flip()+
+ggplot(data = pp_B_pi, aes(x=parameter_group, y=value,group=variable)) + geom_boxplot(aes(fill=parameter_group),outlier.shape=NA)+ coord_flip()+
   theme(legend.position = "none")+ 
-  scale_x_discrete(labels=functional_groups_names[,2])+
-  labs(y="Marginal posterior distributions",x="")+facet_wrap(~parameter, labeller=lab_labeller,scales = "free_y", nrow = 1)
+  facet_grid(.~parameter, labeller=lab_labeller,scales = "free_y")+
+  labs(y="Marginal posterior distributions",x="")
 ```
 
 ### XTerra C18
-```{r, fig.height=14,fig.width=14}
+```{r, fig.height=14}
 #| echo: false
 #| message: false
 #| warning: false
@@ -266,23 +266,53 @@ pp_T_pi$parameter <- rep(c("pilogkw","piS1m","piS1a"),each=4000*60)
 pp_T_pi$parameter_group <- rep(rep(functional_groups_names[,2],each=4000),3)
 pp_T_pi$parameter <- ordered(pp_T_pi$parameter)
 
-ggplot(data = pp_T_pi, aes(x=variable, y=value)) + geom_boxplot(aes(fill=parameter_group),outlier.shape=NA)+ coord_flip()+
+ggplot(data = pp_T_pi, aes(x=parameter_group, y=value,group=variable)) + geom_boxplot(aes(fill=parameter_group),outlier.shape=NA)+ coord_flip()+
   theme(legend.position = "none")+ 
-  scale_x_discrete(labels=functional_groups_names[,2])+
-  labs(y="Marginal posterior distributions",x="")+facet_wrap(~parameter, labeller=lab_labeller,scales = "free_y", nrow = 1)
+  facet_grid(.~parameter, labeller=lab_labeller,scales = "free_y")+
+  labs(y="Marginal posterior distributions",x="")
+  
 ```
 
 ### Comparison of the columns
 
-```{r, fig.height=20,fig.width=14}
+```{r, fig.height=20}
 #| echo: false
 #| message: false
 #| warning: false
 pp_all_pi <- rbind(pp_B_pi,pp_T_pi)
 pp_all_pi$Column <- rep(c("XBridge Shield C18","XTerra C18"),each=4000*60)
 
-ggplot(data = pp_all_pi, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Column),outlier.shape=NA)+ coord_flip()+
+#ggplot(data = pp_all_pi, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Column),outlier.shape=NA)+ coord_flip()+
+#  theme(legend.position = "none")+ 
+#  scale_x_discrete(labels=functional_groups_names[,2])+
+#  labs(y="Marginal posterior distributions",x="")+facet_grid(.~parameter, labeller=lab_labeller,scales = "free_y")
+
+ggplot(data = pp_all_pi, aes(x=parameter_group, y=value, fill=Column)) + geom_boxplot(outlier.shape=NA)+ coord_flip()+
   theme(legend.position = "none")+ 
-  scale_x_discrete(labels=functional_groups_names[,2])+
-  labs(y="Marginal posterior distributions",x="")+facet_wrap(~parameter, labeller=lab_labeller,scales = "free_y", nrow = 1)
+  facet_grid(~parameter, labeller=lab_labeller,scales = "free_y")+
+  labs(y="Marginal posterior distributions",x="")
 ```
+
+Distribution of the difference:
+
+```{r, fig.height=20}
+#| echo: false
+#| message: false
+#| warning: false
+pp_all_pi <- rbind(pp_B_pi,pp_T_pi)
+pp_all_pi$Column <- rep(c("XBridge Shield C18","XTerra C18"),each=4000*60)
+
+pp_all_diff <- pp_B_pi[,-2]
+pp_all_diff$value <- pp_B_pi$value-pp_T_pi$value
+#ggplot(data = pp_all_pi, aes(x=variable, y=value)) + geom_boxplot(aes(fill=Column),outlier.shape=NA)+ coord_flip()+
+#  theme(legend.position = "none")+ 
+#  scale_x_discrete(labels=functional_groups_names[,2])+
+#  labs(y="Marginal posterior distributions",x="")+facet_grid(.~parameter, labeller=lab_labeller,scales = "free_y")
+
+ggplot(data = pp_all_diff, aes(x=parameter_group, y=value,group=variable)) + geom_boxplot(aes(fill=parameter_group),outlier.shape=NA)+ coord_flip()+
+  theme(legend.position = "none")+ 
+  facet_grid(.~parameter, labeller=lab_labeller,scales = "free_y")+
+  labs(y="Marginal posterior distributions",x="")
+```
+
+

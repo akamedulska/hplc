@@ -18,7 +18,6 @@ library(posterior)
 set.seed(10271998) ## not required but assures repeatable results
 ```
 
-
 ```{r, fig.height=16}
 #| echo: false
 #| message: false
@@ -35,7 +34,12 @@ fit_Combined <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/1_2
                                            'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK_1/output_10.csv'))
 
 draws_df_Combined <- fit_Combined$draws(format = "df")
+```
 
+```{r, fig.height=16}
+#| echo: false
+#| message: false
+#| warning: false
 parameters <- c("logkwHat1","logkwHat2",
                 "S1mHat1","S1mHat2","S1aHat1","S1aHat2",
                 "S2mHat1","S2mHat2","S2aHat1","S2aHat2",
@@ -49,77 +53,27 @@ parameters <- c("logkwHat1","logkwHat2",
                 "omega1[1]","omega2[1]","omega1[2]","omega2[2]","omega1[3]","omega2[3]",
                 "omegadlogkT1","omegadlogkT2",
                 "kappa1[1]","kappa2[1]","kappa1[2]","kappa2[2]","kappa1[3]","kappa2[3]",
-                "tau[1]","tau[2]",
                 "apH1[1]","apH2[1]","apH1[2]","apH2[2]",
                 "msigma1","msigma2",
                 "ssigma1","ssigma2")
 
 data_to_plot_par_Combined <- draws_df_Combined[,which(colnames(draws_df_Combined) %in% parameters)]
 
-lab <- c(expression(theta["logkwN,1"]),expression(theta["logkwN,2"]),
-         expression(theta["S1mN,1"]),expression(theta["S1mN,2"]),expression(theta["S1aN,1"]),expression(theta["S1aN,2"]),
-         expression(theta["S2m,1"]),expression(theta["S2m,2"]),expression(theta["S2a,1"]),expression(theta["S2a,2"]),
-         expression(theta["dlogkwA,1"]),expression(theta["dlogkwA,2"]),expression(theta["dlogkwB,1"]),expression(theta["dlogkwB,2"]),
-         expression(theta["dSmA,1"]),expression(theta["dSmA,2"]),expression(theta["dSmB,1"]),expression(theta["dSmB,2"]),
-         expression(theta["dSaA,1"]),expression(theta["dSaA,2"]),expression(theta["dSaB,1"]),expression(theta["dSaB,2"]),
-         expression(theta["dlogkT,1"]),expression(theta["dlogkT,2"]),
-         expression(beta["logkwN,1"]),expression(beta["logkwN,2"]),expression(beta["S1mN,1"]),expression(beta["S1mN,2"]),expression(beta["S1aN,1"]),expression(beta["S1aN,2"]),
-         expression(alpha["mA,1"]),expression(alpha["mA,2"]),expression(alpha["aA,1"]),expression(alpha["aA,2"]),
-         expression(alpha["mB,1"]),expression(alpha["mB,2"]),expression(alpha["aB,1"]),expression(alpha["aB,2"]),
-         expression(omega["logkwN,1"]),expression(omega["logkwN,2"]),expression(omega["S1mN,1"]),expression(omega["logkwN,2"]),expression(omega["S1aN,1"]),expression(omega["S1aN,2"]),
-         expression(omega["dlogkT,1"]),expression(omega["dlogkT,2"]),
-         expression(kappa["logkwN,1"]),expression(kappa["logkwN,2"]),expression(kappa["S1mN,1"]),expression(kappa["logkwN,2"]),expression(kappa["S1aN,1"]),expression(kappa["S1aN,2"]),
-         expression(tau["m"]),expression(tau["a"]),
-         expression(apH["A,1"]),expression(apH["A,2"]),expression(apH["B,1"]),expression(apH["B,2"]),
-         expression(m[sigma,",1"]),expression(m[sigma,",2"]),
-         expression(s[sigma,",1"]),expression(s[sigma,",2"]))
- 
 library(reshape2)
 pp_C <- melt(data_to_plot_par_Combined)
-pp_C[,1] <- ordered(pp_C[,1],parameters) 
-#pp_B$Column <- rep("XBridge Shield C18",nrow(pp_B))
-ggplot(data = pp_C, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable),outlier.shape=NA)+ coord_flip()+
-  theme(legend.position = "none")+ scale_x_discrete(labels=rev(lab),limits=rev)+
-  labs(y="Marginal posterior distributions",x="")
-```
 
-```{r, fig.height=16}
-#| echo: false
-#| message: false
-#| warning: false
-parameters1 <- c("logkwHat1","logkwHat2",
-                "S1mHat1","S1mHat2","S1aHat1","S1aHat2",
-                "S2mHat1","S2mHat2","S2aHat1","S2aHat2",
-                "dlogkwHat1[1]","dlogkwHat2[1]","dlogkwHat1[2]","dlogkwHat2[2]",
-                "dSmHat1[1]","dSmHat2[1]","dSmHat1[2]","dSmHat2[2]",
-                "dSaHat1[1]","dSaHat2[1]","dSaHat1[2]","dSaHat2[2]",
-                "dlogkTHat1","dlogkTHat2",
-                "beta1[1]","beta2[1]","beta1[2]","beta2[2]","beta1[3]","beta2[3]",
-                "alphaAHat1[1]","alphaAHat2[1]","alphaAHat1[2]","alphaAHat2[2]",
-                "alphaBHat1[1]","alphaBHat2[1]","alphaBHat1[2]","alphaBHat2[2]",
-                "omega1[1]","omega2[1]","omega1[2]","omega2[2]","omega1[3]","omega2[3]",
-                "omegadlogkT1","omegadlogkT2",
-                "kappa1[1]","kappa2[1]","kappa1[2]","kappa2[2]","kappa1[3]","kappa2[3]",
-                "apH1[1]","apH2[1]","apH1[2]","apH2[2]",
-                "msigma1","msigma2",
-                "ssigma1","ssigma2")
-
-data_to_plot_par_Combined1 <- draws_df_Combined[,which(colnames(draws_df_Combined) %in% parameters1)]
-
-pp_Com <- melt(data_to_plot_par_Combined1)
-
-pp_Com$Column <-c(rep("XBridge Shield C18",120000),rep("XTerra C18",120000))
+pp_C$Column <-c(rep("XBridge Shield C18",120000),rep("XTerra C18",120000))
 
 parameters_names <- c("logkwHat","S1mHat","S1aHat","S2mHat","S2aHat","dlogkwHat[1]","dlogkwHat[2]","dSmHat[1]","dSmHat[2]",
 "dSaHat[1]","dSaHat[2]","dlogkTHat","beta[1]","beta[2]","beta[3]","alphaAHat[1]","alphaAHat[2]",
 "alphaBHat[1]","alphaBHat[2]","omega[1]","omega[2]","omega[3]","omegadlogkT","kappa[1]","kappa[2]","kappa[3]",
 "apH[1]","apH[2]","msigma","ssigma")
 
-pp_Com$variable1 <- rep(parameters_names,times=2,each=4000)
+pp_C$variable1 <- rep(parameters_names,times=2,each=4000)
 
-pp_Com$variable1 <- ordered(pp_Com$variable1,parameters_names) 
+pp_C$variable1 <- ordered(pp_C$variable1,parameters_names) 
 
-lab_names <- list(
+lab_names <- c(
   	'logkwHat'=expression(theta["logkwN"]),
   	"S1mHat"=expression(theta["S1mN"]),
   	"S1aHat"=expression(theta["S1aN"]),
@@ -152,34 +106,19 @@ lab_names <- list(
 	  "ssigma"=expression(s[sigma])
 )
 
+lab_names_1 <- as.list(lab_names)
 lab_labeller <- function(variable,value){
-  return(lab_names[value])
+  return(lab_names_1[value])
 }
-
-ggplot(data = pp_Com, aes(x=variable1, y=value)) + geom_boxplot(aes(fill=Column),outlier.shape=NA)+ coord_flip()+
-  #theme(legend.position = "none")+ 
-  scale_x_discrete(labels=lab_labeller())+
-  labs(y="Marginal posterior distributions",x="")+facet_wrap(~variable1, labeller=lab_labeller,scales = "free", nrow = 15)
 ```
 
-```{r, fig.height=16}
+
+```{r, fig.height=14}
 #| echo: false
 #| message: false
 #| warning: false
-variable <- rep(parameters_names,each=4000)
-value <- pp_Com[120001:240000,2]-pp_Com[1:120000,2]
-pp_Com_dif <- as.data.frame(cbind(variable,value))
-pp_Com_dif[,1] <- ordered(pp_Com_dif[,1],parameters_names) 
-pp_Com_dif[,2] <- as.numeric(pp_Com_dif[,2])
-```
-## Distribution of differences in parameters between columns 
-
-```{r}
-#| echo: false
-#| message: false
-#| warning: false
-ggplot(data = pp_Com_dif, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable),outlier.shape=NA)+ coord_flip()+
-  theme(legend.position = "none")+ #scale_x_discrete(labels=lab_labeller())+
+ggplot(data = pp_C, aes(x=variable1, y=value)) + geom_boxplot(aes(fill=Column),outlier.shape=NA)+ coord_flip()+
+  scale_x_discrete(labels=lab_names)+
   labs(y="Marginal posterior distributions",x="")
 ```
 
@@ -187,8 +126,149 @@ ggplot(data = pp_Com_dif, aes(x=variable, y=value)) + geom_boxplot(aes(fill=vari
 #| echo: false
 #| message: false
 #| warning: false
-ggplot(data = pp_Com_dif, aes(x=variable, y=value)) + geom_boxplot(outlier.shape=NA)+ coord_flip()+
+
+
+ggplot(data = pp_C, aes(x=variable1, y=value)) + geom_boxplot(aes(fill=Column),outlier.shape=NA)+ coord_flip()+
+  #theme(legend.position = "none")+ 
+  scale_x_discrete(labels=lab_labeller())+
+  labs(y="Marginal posterior distributions",x="")+facet_wrap(~variable1, labeller=lab_labeller,scales = "free", nrow = 15)
+```
+
+
+
+### Distribution of differences in parameters between columns
+
+```{r, fig.height=16}
+#| echo: false
+#| message: false
+#| warning: false
+variable <- rep(parameters_names,each=4000)
+value <- pp_C[120001:240000,2]-pp_C[1:120000,2]
+pp_C_dif <- as.data.frame(cbind(variable,value))
+pp_C_dif[,1] <- ordered(pp_C_dif[,1],parameters_names) 
+pp_C_dif[,2] <- as.numeric(pp_C_dif[,2])
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+ggplot(data = pp_C_dif, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable),outlier.shape=NA)+ coord_flip()+
+  theme(legend.position = "none")+ scale_x_discrete(labels=lab_names)+
+  labs(y="Marginal posterior distributions",x="")
+```
+
+```{r, fig.height=16}
+#| echo: false
+#| message: false
+#| warning: false
+ggplot(data = pp_C_dif, aes(x=variable, y=value)) + geom_boxplot(outlier.shape=NA)+ coord_flip()+
   #theme(legend.position = "none")+ 
   scale_x_discrete(labels=lab_labeller())+
   labs(y="Marginal posterior distributions",x="")+facet_wrap(~variable, labeller=lab_labeller,scales = "free", nrow = 15)
 ```
+## Parameters related to functional groups
+
+```{r, fig.height=14}
+#| echo: false
+#| message: false
+#| warning: false
+functional_groups = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/6-checkmol-functional-groups.csv')
+functional_groups_names = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/Legend-checkmol-functional-group-names.csv')
+
+functional_groups=functional_groups[,2:ncol(functional_groups)]
+
+# combine nr of caroboxylic acid and carboxyalic acid salt functional groups
+functional_groups[,76]=functional_groups[,76]+functional_groups[,77]       
+functional_groups[which(functional_groups[,202]>5.5),202] = 6; # heterocyclic compounds with more than 6 heterocycles are treated as if they have six
+
+########
+idx_included <- c(4,5,9,11,14,18,19,20,21,24,26,29,30,31,32,33,34,38,39,40,41,45,49,50,52,53,54,56,57,59,63,64,68,69,70,71,76,78,79,81,82,83,84,85,88,90,106,108,113,114,115,127,131,133,137,138,150,164,166,167)
+functional_groups_names <- functional_groups_names[idx_included,]
+functional_groups <- functional_groups[,idx_included]
+########
+
+lab_names <- list(
+  	'pilogkw'=expression(pi["logkwN"]),
+  	"piS1m"=expression(pi["S1mN"]),
+	  "piS1a"=expression(pi["S1aN"])
+)
+
+lab_labeller <- function(variable,value){
+  return(lab_names[value])
+}
+
+ 
+data_to_plot_par_pilogkw1_Combined <- draws_df_Combined[,which(colnames(draws_df_Combined) %in% grep("pilogkw1", names(draws_df_Combined), value = TRUE))]
+
+data_to_plot_par_piS1m1_Combined <- draws_df_Combined[,which(colnames(draws_df_Combined) %in% grep("piS1m1", names(draws_df_Combined), value = TRUE))]
+
+data_to_plot_par_piS1a1_Combined <- draws_df_Combined[,which(colnames(draws_df_Combined) %in% grep("piS1a1", names(draws_df_Combined), value = TRUE))]
+
+data_to_plot_par_pilogkw2_Combined <- draws_df_Combined[,which(colnames(draws_df_Combined) %in% grep("pilogkw2", names(draws_df_Combined), value = TRUE))]
+
+data_to_plot_par_piS1m2_Combined <- draws_df_Combined[,which(colnames(draws_df_Combined) %in% grep("piS1m2", names(draws_df_Combined), value = TRUE))]
+
+data_to_plot_par_piS1a2_Combined <- draws_df_Combined[,which(colnames(draws_df_Combined) %in% grep("piS1a2", names(draws_df_Combined), value = TRUE))]
+
+pp_C_pilogkw1 <- melt(data_to_plot_par_pilogkw1_Combined)
+pp_C_pilogkw1[,1] <- ordered(pp_C_pilogkw1[,1]) 
+pp_C_S1m1 <- melt(data_to_plot_par_piS1m1_Combined)
+pp_C_S1m1[,1] <- ordered(pp_C_S1m1[,1]) 
+pp_C_S1a1 <- melt(data_to_plot_par_piS1a1_Combined)
+pp_C_S1a1[,1] <- ordered(pp_C_S1a1[,1]) 
+
+pp_C_pilogkw2 <- melt(data_to_plot_par_pilogkw2_Combined)
+pp_C_pilogkw2[,1] <- ordered(pp_C_pilogkw2[,1]) 
+pp_C_S1m2 <- melt(data_to_plot_par_piS1m2_Combined)
+pp_C_S1m2[,1] <- ordered(pp_C_S1m2[,1]) 
+pp_C_S1a2 <- melt(data_to_plot_par_piS1a2_Combined)
+pp_C_S1a2[,1] <- ordered(pp_C_S1a2[,1]) 
+
+pp_C_pi <- rbind(pp_C_pilogkw1,pp_C_S1m1,pp_C_S1a1,pp_C_pilogkw2,pp_C_S1m2,pp_C_S1a2)
+pp_C_pi$parameter <- rep(rep(c("pilogkw","piS1m","piS1a"),each=4000*60),2)
+pp_C_pi$parameter <- ordered(pp_C_pi$parameter)
+pp_C_pi$parameter_group <- rep(rep(functional_groups_names[,2],each=4000),3*2)
+
+```
+
+
+
+```{r, fig.height=20}
+#| echo: false
+#| message: false
+#| warning: false
+ggplot(data = pp_C_pi, aes(x=parameter_group, y=value,group=variable)) + geom_boxplot(aes(fill=parameter_group),outlier.shape=NA)+ coord_flip()+
+  theme(legend.position = "none")+ 
+  facet_grid(.~parameter, labeller=lab_labeller,scales = "free_y")+
+  labs(y="Marginal posterior distributions",x="")
+```
+
+### Distribution of differences in parameters between columns
+
+```{r, fig.height=16}
+#| echo: false
+#| message: false
+#| warning: false
+variable_pi <- rep(rep(functional_groups_names[,2],each=4000),3)
+value <- pp_C_pi[720001:1440000,2]-pp_C_pi[1:720000,2]
+parameter_pi <- rep(c("pilogkw","piS1m","piS1a"),each=4000*60)
+pp_C_dif <- as.data.frame(cbind(variable_pi,value,parameter_pi))
+#pp_C_dif[,1] <- ordered(pp_C_dif[,1],functional_groups_names[,2]) 
+pp_C_dif[,2] <- as.numeric(pp_C_dif[,2])
+```
+
+```{r, fig.height=16}
+#| echo: false
+#| message: false
+#| warning: false
+#ggplot(data = pp_C_dif, aes(x=variable, y=value)) + geom_boxplot(aes(fill=variable),outlier.shape=NA)+ coord_flip()+
+#  theme(legend.position = "none")+ scale_x_discrete(labels=lab_names)+
+#  labs(y="Marginal posterior distributions",x="")
+
+ggplot(data = pp_C_dif, aes(x=variable_pi, y=value)) + geom_boxplot(aes(fill=variable_pi),outlier.shape=NA)+ coord_flip()+
+  theme(legend.position = "none")+ 
+  facet_grid(.~parameter_pi, labeller=lab_labeller,scales = "free_y")+
+  labs(y="Marginal posterior distributions",x="")
+```
+

@@ -1,0 +1,283 @@
+## logk vs fi
+
+```{r, fig.height=8}
+#| echo: false
+#| message: false
+#| warning: false
+library(pracma)
+library(dplyr)
+library(ggplot2)
+require(gridExtra)
+library(GGally)
+library(cmdstanr)
+library(rstan)
+library(knitr)
+library(reshape2)
+library(bayesplot)
+library(posterior)
+
+set.seed(10271998) ## not required but assures repeatable results
+
+data1 = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/1-X_Bridge_Shield_C18_5cm.csv')
+data1$Mod  = as.character(data1$Mod)
+data1$Mod2 = ifelse(data1$Mod=="MeOH",1,2)                        # MeOH = 1, ACN = 2
+
+dataNames = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/4-compounds-names.csv')
+dataACD = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/2-ACD-pKas-logP.csv')
+functional_groups = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/6-checkmol-functional-groups.csv')
+functional_groups_names = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Bridge_Shield_C18/skrypt-R/data/Legend-checkmol-functional-group-names.csv')
+
+# predictors
+pKaslit = dataACD[,3:7]           # pKa values as predicted by ACD
+pKasliterror = dataACD[,25:29]    # pKa error as predicted by ACD
+chargesA = abs(dataACD[,13:18])   # number of ionized groups (anions)
+chargesB = abs(dataACD[,19:24])   # number of ionized groups (cations)
+charges = chargesA+chargesB                         # absolute charge
+groupsA = (chargesA[,2:5] - chargesA[,1:4])         # acidic group
+groupsB = -(chargesB[,2:5] - chargesB[,1:4])        # basic group
+R = rowSums(pKaslit<14)                             # number of dissociation steps
+logP = dataACD$logP 
+
+
+functional_groups=functional_groups[,2:ncol(functional_groups)]
+
+# combine nr of caroboxylic acid and carboxyalic acid salt functional groups
+functional_groups[,76]=functional_groups[,76]+functional_groups[,77]       
+functional_groups[which(functional_groups[,202]>5.5),202] = 6; # heterocyclic compounds with more than 6 heterocycles are treated as if they have six
+
+########
+idx_included <- c(4,5,9,11,14,18,19,20,21,24,26,29,30,31,32,33,34,38,39,40,41,45,49,50,52,53,54,56,57,59,63,64,68,69,70,71,76,78,79,81,82,83,84,85,88,90,106,108,113,114,115,127,131,133,137,138,150,164,166,167)
+functional_groups_names <- functional_groups_names[idx_included,]
+functional_groups <- functional_groups[,idx_included]
+########
+
+data1 <- data1[-which(data1$Score<95),]
+
+ID_freq <- as.data.frame(table(data1$METID))
+ID <- ID_freq[which(ID_freq$Freq>42),1]
+data1 <- data1[which(data1$METID %in% ID),]
+rm(ID_freq,ID)
+
+data1$METEXPID = data1$METID*100+data1$EXPID
+data1 <- data1 %>% 
+  group_by(METEXPID) %>%
+  slice(which.max(Score))
+
+data1 <- data1[-which(data1$METID==72),]
+
+data1 = data1[which(data1$METID %in% which(R<=2)),]
+
+data2 = read.csv('C:/Users/agnie/Desktop/HPLC_2022/X_Terra_C18/skrypt_R/data/1-XTerra_MS_C18.csv')
+data2$Mod  = as.character(data2$Mod)
+data2$Mod2 = ifelse(data2$Mod=="MeOH",1,2)                        # MeOH = 1, ACN = 2
+
+data2 <- data2[-which(data2$Score<95),]
+
+ID_freq <- as.data.frame(table(data2$METID))
+ID <- ID_freq[which(ID_freq$Freq>42),1]
+data2 <- data2[which(data2$METID %in% ID),]
+rm(ID_freq,ID)
+
+data2$METEXPID = data2$METID*100+data2$EXPID
+data2 <- data2 %>% 
+  group_by(METEXPID) %>%
+  slice(which.max(Score))
+
+data2 <- data2[-which(data2$METID==72),]
+
+data2 = data2[which(data2$METID %in% which(R<=2)),]
+
+
+# Prepare predictors:
+maxR =2                                                                # max two dissociation steps        
+pKaslit1 = pKaslit[which(dataACD$METID %in% data1$METID),1:maxR]              # pKa values as predicted by ACD
+pKasliterror1 = pKasliterror[which(dataACD$METID %in% data1$METID),1:maxR]    # pKa error as predicted by ACD
+chargesA1 = chargesA[which(dataACD$METID %in% data1$METID),1:(maxR+1)]   # number of ionized groups (anions)
+chargesB1 = chargesB[which(dataACD$METID %in% data1$METID),1:(maxR+1)]   # number of ionized groups (cations)
+charges1 = charges[which(dataACD$METID %in% data1$METID),1:(maxR+1)]     # absolute charge
+groupsA1 = groupsA[which(dataACD$METID %in% data1$METID),1:maxR]         # acidic group
+groupsB1 = groupsB[which(dataACD$METID %in% data1$METID),1:maxR]         # basic group
+R1 = R[which(dataACD$METID %in% data1$METID)]                             # number of dissociation steps
+logP1 = logP[which(dataACD$METID %in% data1$METID)]                       # logP
+nrfungroups1 = functional_groups[which(dataACD$METID %in% data1$METID),]
+
+pKaslit2 = pKaslit[which(dataACD$METID %in% data2$METID),1:maxR]              # pKa values as predicted by ACD
+pKasliterror2 = pKasliterror[which(dataACD$METID %in% data2$METID),1:maxR]    # pKa error as predicted by ACD
+chargesA2 = chargesA[which(dataACD$METID %in% data2$METID),1:(maxR+1)]   # number of ionized groups (anions)
+chargesB2 = chargesB[which(dataACD$METID %in% data2$METID),1:(maxR+1)]   # number of ionized groups (cations)
+charges2 = charges[which(dataACD$METID %in% data2$METID),1:(maxR+1)]     # absolute charge
+groupsA2 = groupsA[which(dataACD$METID %in% data2$METID),1:maxR]         # acidic group
+groupsB2 = groupsB[which(dataACD$METID %in% data2$METID),1:maxR]         # basic group
+R2 = R[which(dataACD$METID %in% data2$METID)]                             # number of dissociation steps
+logP2 = logP[which(dataACD$METID %in% data2$METID)]                       # logP
+nrfungroups2 = functional_groups[which(dataACD$METID %in% data2$METID),]
+
+K <- ncol(nrfungroups1)
+
+nObs1 = length(data1$METID)
+nAnalytes1 = length(unique(data1$METID))
+npH = length(unique(data1$pH))
+analyte1=match(data1$METID, unique(data1$METID))
+steps1=4*(2-data1$Mod2) + 10*(data1$Mod2-1)
+hplcparam1=cbind(data1$tg,data1$td,data1$to,data1$te,data1$fio,data1$fik,data1$Mod2,
+                 data1$pHo,data1$alpha1,data1$alpha2,(data1$Temp-25)/10)
+mod1=data1$Mod2
+logPobs1=logP1
+trobs1=data1$RT
+
+nObs2 = length(data2$METID)
+nAnalytes2 = length(unique(data2$METID))
+analyte2=match(data2$METID, unique(data2$METID))
+steps2=4*(2-data2$Mod2) + 10*(data2$Mod2-1)
+hplcparam2=cbind(data2$tg,data2$td,data2$to,data2$te,data2$fio,data2$fik,data2$Mod2,
+                 data2$pHo,data2$alpha1,data2$alpha2,(data2$Temp-25)/10)
+mod2=data2$Mod2
+logPobs2=logP2
+trobs2=data2$RT
+
+index <- c(10,11)
+pH_value <- c(-20,20)
+gradient <- 30
+temp <-25
+nAnalytes3 <- length(index)
+
+fi <- rep(rep(seq(0,1,by=0.1),length(pH_value)),2*nAnalytes3)
+pH <- rep(rep(pH_value,each=length(seq(0,1,by=0.1))*2),nAnalytes3)
+fipH3 <-cbind(fi,pH)
+
+mod3 <- rep(rep(c(2,1),each=length(seq(0,1,by=0.1))),2*nAnalytes3)
+steps3=4*(2-mod3) + 10*(mod3-1)
+hplcparam3=cbind(rep(gradient,by=length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
+                 rep(2.1,by=length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
+                 rep(0.532,by=length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
+                 rep(0.04,by=length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
+                 rep(0.05,by=length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
+                 rep(0.8,by=length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
+                 mod3,
+                 rep(0,length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
+                 rep(0,length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
+                 rep(0,length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
+                 (rep(temp,each=length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3)-25)/10)
+
+nObs3 <- length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3
+analyte3 <- rep(which(unique(data1$METID) %in% index),each=length(pH_value)*length(seq(0,1,by=0.1))*2)  # 1 - column (xbridge)
+analyte4 <- rep(which(unique(data2$METID) %in% index),each=length(pH_value)*length(seq(0,1,by=0.1))*2)  # 2 - column (xterra)
+analyte5 <- rep(c(1,2),each=length(pH_value)*length(seq(0,1,by=0.1))*2)  # 2 - column (xterra)
+pKaslit3 = pKaslit[which(dataACD$METID %in% index),1:maxR]              # pKa values as predicted by ACD
+pKasliterror3 = pKasliterror[which(dataACD$METID %in% index),1:maxR]    # pKa error as predicted by ACD
+chargesA3 = chargesA[which(dataACD$METID %in% index),1:(maxR+1)]   # number of ionized groups (anions)
+chargesB3 = chargesB[which(dataACD$METID %in% index),1:(maxR+1)]   # number of ionized groups (cations)
+charges3 = charges[which(dataACD$METID %in% index),1:(maxR+1)]     # absolute charge
+groupsA3 = groupsA[which(dataACD$METID %in% index),1:maxR]         # acidic group
+groupsB3 = groupsB[which(dataACD$METID %in% index),1:maxR]         # basic group
+R3 = R[which(dataACD$METID %in% index)]                             # number of dissociation steps
+logPobs3 = logP[which(dataACD$METID %in% index)]                       # logP
+nrfungroups3 = functional_groups[which(dataACD$METID %in% index),]
+
+####################################
+
+stan_rdump(c("nAnalytes1", 
+             "nAnalytes2",
+             "nObs1",
+             "nObs2",
+             "npH", 
+             "analyte1", 
+             "steps1", 
+             "hplcparam1",  
+             "mod1",
+             "analyte2", 
+             "steps2", 
+             "hplcparam2",  
+             "mod2",
+             "logPobs1", 
+             "logPobs2", 
+             "maxR", 
+             "R1", 
+             "pKaslit1",  
+             "pKasliterror1",
+             "groupsA1",
+             "groupsB1",
+             "chargesA1", 
+             "chargesB1",
+             "trobs1",
+             "trobs2",
+             "K",
+             "nrfungroups1",
+             "R2", 
+             "pKaslit2",  
+             "pKasliterror2",
+             "groupsA2",
+             "groupsB2",
+             "chargesA2", 
+             "chargesB2",
+             "nrfungroups2",
+             "nObs3",
+             "analyte3", 
+             "analyte4",
+             "analyte5",
+             "steps3", 
+             "hplcparam3",  
+             "mod3",
+             "nAnalytes3",
+             "logPobs3",
+             "groupsA3",
+             "groupsB3",
+             "chargesA3", 
+             "chargesB3",
+             "nrfungroups3",
+             "R3", 
+             "pKaslit3",  
+             "pKasliterror3",
+             "fipH3"),
+           file="C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/model_qq_1.data.R")
+
+#model_qq <- cmdstan_model("C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/hplc-gra-redsum_qsrr_04_10_qq_1.stan")
+
+#fit_Combined <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_1.csv',
+#                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_2.csv',
+#                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_3.csv',
+#                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_4.csv',
+#                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_5.csv',
+#                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_6.csv',
+#                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_7.csv',
+#                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_8.csv',
+#                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_9.csv',
+#                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_10.csv'))
+
+#fit_1_qq  <- model_qq$generate_quantities(fit_Combined,data = "C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/model_qq_1.data.R",seed = 123)
+#rm(fit_Combined,hplcparam1,hplcparam2,hplcparam3,hplcparam4,model_qq,data1,data2)
+#fit_1_qq$save_object(file = "C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/fit_1_qq.RDS")
+fit_1_qq <- readRDS("C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/fit_1_qq.RDS")
+draws_1_qq_df <- fit_1_qq$draws(format = "df")
+#write.csv(draws_1_qq_df,"C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/draws_04_10_1_qq.csv", row.names = TRUE)
+
+
+
+
+#####################################
+df <- draws_1_qq_df
+logkCond1 <- apply(df[,which(colnames(df) %in% grep("logkCond1", names(df), value = TRUE))], MARGIN = 2, FUN = quantile, probs = c(.025,.5,.975))
+logkCond2 <- apply(df[,which(colnames(df) %in% grep("logkCond2", names(df), value = TRUE))], MARGIN = 2, FUN = quantile, probs = c(.025,.5,.975))
+
+df_logkCond <- cbind(analyte5,as.data.frame(t(logkCond1)),as.data.frame(t(logkCond2)),fipH3,mod3)
+colnames(df_logkCond) <- c("analyte5","trCond1_Low","trCond1_Median","trCond1_High","trCond2_Low","trCond2_Median","trCond2_High","fi","pH","Mod")
+
+df_logkCond$analyte5 <- as.factor(df_logkCond$analyte5)
+
+mod.labs <- c("ACN","MeOH")
+names(mod.labs) <- c('2','1')
+
+pH.labs <- c("pH = -20","pH = 20")
+names(pH.labs) <- c('-20','20')
+
+
+ggplot(df_logkCond)+ 
+  geom_line(aes(x = fi,  y = trCond1_Median, color =analyte5))+
+  #geom_line(aes(x = fi,  y = trCond2_Median, color = "blue"))+
+  geom_ribbon(aes(x = fi, ymin = trCond1_Low, ymax = trCond1_High, color = analyte5), alpha = 0.25)+
+  #geom_ribbon(aes(x = fi, ymin = trCond2_Low, ymax = trCond2_High, color = "blue"), alpha = 0.25)+
+  facet_grid(pH~Mod,labeller = labeller(Mod=mod.labs,pH=pH.labs))+
+  #scale_fill_discrete(name = "Analyte", labels = unique(data1$Name[which(data1$METID %in% index)]))+
+  scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", "blue")) +
+  labs(x ="fi", y = "log k", color = "Analyte")
+```

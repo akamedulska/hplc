@@ -270,14 +270,55 @@ names(mod.labs) <- c('2','1')
 pH.labs <- c("pH = -20","pH = 20")
 names(pH.labs) <- c('-20','20')
 
+```
 
+### XBridge Shield C18
+
+```{r, fig.height=6}
+#| echo: false
+#| message: false
+#| warning: false
 ggplot(df_logkCond)+ 
   geom_line(aes(x = fi,  y = trCond1_Median, color =analyte5))+
-  #geom_line(aes(x = fi,  y = trCond2_Median, color = "blue"))+
   geom_ribbon(aes(x = fi, ymin = trCond1_Low, ymax = trCond1_High, color = analyte5), alpha = 0.25)+
-  #geom_ribbon(aes(x = fi, ymin = trCond2_Low, ymax = trCond2_High, color = "blue"), alpha = 0.25)+
   facet_grid(pH~Mod,labeller = labeller(Mod=mod.labs,pH=pH.labs))+
-  #scale_fill_discrete(name = "Analyte", labels = unique(data1$Name[which(data1$METID %in% index)]))+
   scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", "blue")) +
   labs(x ="fi", y = "log k", color = "Analyte")
 ```
+
+
+### XTerra C18
+
+```{r, fig.height=6}
+#| echo: false
+#| message: false
+#| warning: false
+ggplot(df_logkCond)+ 
+  geom_line(aes(x = fi,  y = trCond2_Median, color =analyte5))+
+  geom_ribbon(aes(x = fi, ymin = trCond2_Low, ymax = trCond2_High, color = analyte5), alpha = 0.25)+
+  facet_grid(pH~Mod,labeller = labeller(Mod=mod.labs,pH=pH.labs))+
+  scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", "blue")) +
+  labs(x ="fi", y = "log k", color = "Analyte")
+```
+
+### Combined
+
+```{r, fig.height=6}
+#| echo: false
+#| message: false
+#| warning: false
+
+df_logkCond_Com <- rbind(as.data.frame(t(logkCond1)),as.data.frame(t(logkCond2)))
+df_logkCond_Com <- cbind(rep(analyte5,2),df_logkCond_Com,fi,pH,rep(mod3,2),rep(c("Xbrigde Shield C18","XTerra C18"),each=88))
+colnames(df_logkCond_Com) <- c("analyte5","trCond_Low","trCond_Median","trCond_High","fi","pH","Mod","Column")
+
+df_logkCond_Com$analyte5 <- as.factor(df_logkCond_Com$analyte5)
+
+ggplot(df_logkCond_Com)+
+    geom_line(aes(x = fi,  y = trCond_Median, color =analyte5))+
+    geom_ribbon(aes(x = fi, ymin = trCond_Low, ymax = trCond_High, color = analyte5), alpha = 0.25)+
+    facet_grid(pH~Mod+Column,labeller = labeller(Mod=mod.labs,pH=pH.labs))+
+    scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", "blue","lightred","lightblue")) +
+    labs(x ="fi", y = "log k", color = "Analyte")
+```
+

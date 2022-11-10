@@ -136,7 +136,7 @@ logPobs2=logP2
 trobs2=data2$RT
 
 index <- c(10,11)
-pH_value <- c(-20,20)
+pH_value <- c(2.5,10.5)
 gradient <- 30
 temp <-25
 nAnalytes3 <- length(index)
@@ -267,8 +267,8 @@ df_logkCond$analyte5 <- as.factor(df_logkCond$analyte5)
 mod.labs <- c("ACN","MeOH")
 names(mod.labs) <- c('2','1')
 
-pH.labs <- c("pH = -20","pH = 20")
-names(pH.labs) <- c('-20','20')
+pH.labs <- c("pH = 2.5","pH = 10.5")
+names(pH.labs) <- c('2.5','10.5')
 
 ```
 

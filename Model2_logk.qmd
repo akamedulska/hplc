@@ -251,10 +251,14 @@ fit_1_qq <- readRDS("C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/
 draws_1_qq_df <- fit_1_qq$draws(format = "df")
 #write.csv(draws_1_qq_df,"C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/draws_04_10_1_qq.csv", row.names = TRUE)
 
+```
 
+### Individual predictions
 
-
-#####################################
+```{r, fig.height=8}
+#| echo: false
+#| message: false
+#| warning: false
 df <- draws_1_qq_df
 logkCond1 <- apply(df[,which(colnames(df) %in% grep("logkCond1", names(df), value = TRUE))], MARGIN = 2, FUN = quantile, probs = c(.025,.5,.975))
 logkCond2 <- apply(df[,which(colnames(df) %in% grep("logkCond2", names(df), value = TRUE))], MARGIN = 2, FUN = quantile, probs = c(.025,.5,.975))
@@ -272,7 +276,9 @@ names(pH.labs) <- c('2.5','10.5')
 
 ```
 
-### XBridge Shield C18
+
+
+#### XBridge Shield C18
 
 ```{r, fig.height=6}
 #| echo: false
@@ -287,7 +293,7 @@ ggplot(df_logkCond)+
 ```
 
 
-### XTerra C18
+#### XTerra C18
 
 ```{r, fig.height=6}
 #| echo: false
@@ -301,7 +307,7 @@ ggplot(df_logkCond)+
   labs(x ="fi", y = "log k", color = "Analyte")
 ```
 
-### Combined
+#### Combined
 
 ```{r, fig.height=6}
 #| echo: false
@@ -315,6 +321,82 @@ colnames(df_logkCond_Com) <- c("analyte5","trCond_Low","trCond_Median","trCond_H
 df_logkCond_Com$analyte5 <- as.factor(df_logkCond_Com$analyte5)
 
 ggplot(df_logkCond_Com)+
+    geom_line(aes(x = fi,  y = trCond_Median, color =analyte5))+
+    geom_ribbon(aes(x = fi, ymin = trCond_Low, ymax = trCond_High, color = analyte5), alpha = 0.25)+
+    facet_grid(pH~Mod+Column,labeller = labeller(Mod=mod.labs,pH=pH.labs))+
+    scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", "blue","lightred","lightblue")) +
+    labs(x ="fi", y = "log k", color = "Analyte")
+```
+
+
+### Population predictions
+
+```{r, fig.height=8}
+#| echo: false
+#| message: false
+#| warning: false
+df <- draws_1_qq_df
+logkPred1 <- apply(df[,which(colnames(df) %in% grep("logkPred1", names(df), value = TRUE))], MARGIN = 2, FUN = quantile, probs = c(.025,.5,.975))
+logkPred2 <- apply(df[,which(colnames(df) %in% grep("logkPred2", names(df), value = TRUE))], MARGIN = 2, FUN = quantile, probs = c(.025,.5,.975))
+
+df_logkPred <- cbind(analyte5,as.data.frame(t(logkPred1)),as.data.frame(t(logkPred2)),fipH3,mod3)
+colnames(df_logkPred) <- c("analyte5","trCond1_Low","trCond1_Median","trCond1_High","trCond2_Low","trCond2_Median","trCond2_High","fi","pH","Mod")
+
+df_logkPred$analyte5 <- as.factor(df_logkPred$analyte5)
+
+mod.labs <- c("ACN","MeOH")
+names(mod.labs) <- c('2','1')
+
+pH.labs <- c("pH = 2.5","pH = 10.5")
+names(pH.labs) <- c('2.5','10.5')
+
+```
+
+
+
+#### XBridge Shield C18
+
+```{r, fig.height=6}
+#| echo: false
+#| message: false
+#| warning: false
+ggplot(df_logkPred)+ 
+  geom_line(aes(x = fi,  y = trCond1_Median, color =analyte5))+
+  geom_ribbon(aes(x = fi, ymin = trCond1_Low, ymax = trCond1_High, color = analyte5), alpha = 0.25)+
+  facet_grid(pH~Mod,labeller = labeller(Mod=mod.labs,pH=pH.labs))+
+  scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", "blue")) +
+  labs(x ="fi", y = "log k", color = "Analyte")
+```
+
+
+#### XTerra C18
+
+```{r, fig.height=6}
+#| echo: false
+#| message: false
+#| warning: false
+ggplot(df_logkPred)+ 
+  geom_line(aes(x = fi,  y = trCond2_Median, color =analyte5))+
+  geom_ribbon(aes(x = fi, ymin = trCond2_Low, ymax = trCond2_High, color = analyte5), alpha = 0.25)+
+  facet_grid(pH~Mod,labeller = labeller(Mod=mod.labs,pH=pH.labs))+
+  scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", "blue")) +
+  labs(x ="fi", y = "log k", color = "Analyte")
+```
+
+#### Combined
+
+```{r, fig.height=6}
+#| echo: false
+#| message: false
+#| warning: false
+
+df_logkPred_Com <- rbind(as.data.frame(t(logkPred1)),as.data.frame(t(logkPred2)))
+df_logkPred_Com <- cbind(rep(analyte5,2),df_logkPred_Com,fi,pH,rep(mod3,2),rep(c("Xbrigde Shield C18","XTerra C18"),each=88))
+colnames(df_logkPred_Com) <- c("analyte5","trCond_Low","trCond_Median","trCond_High","fi","pH","Mod","Column")
+
+df_logkPred_Com$analyte5 <- as.factor(df_logkPred_Com$analyte5)
+
+ggplot(df_logkPred_Com)+
     geom_line(aes(x = fi,  y = trCond_Median, color =analyte5))+
     geom_ribbon(aes(x = fi, ymin = trCond_Low, ymax = trCond_High, color = analyte5), alpha = 0.25)+
     facet_grid(pH~Mod+Column,labeller = labeller(Mod=mod.labs,pH=pH.labs))+

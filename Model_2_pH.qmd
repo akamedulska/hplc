@@ -232,7 +232,7 @@ stan_rdump(c("nAnalytes1",
              "fipH3"),
            file="C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/model_qq_2.data.R")
 
-model_qq <- cmdstan_model("C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/hplc-gra-redsum_qsrr_04_10_qq_2.stan")
+#model_qq <- cmdstan_model("C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/hplc-gra-redsum_qsrr_04_10_qq_2.stan")
 
 #fit_Combined <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_1.csv',
 #                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_2.csv',

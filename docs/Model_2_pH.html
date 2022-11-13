@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>model_2_ph</title>
+<title>RP-HPLC - 9&nbsp; logk vs pH</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,56 +23,204 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="Model_2_pH_files/libs/clipboard/clipboard.min.js"></script>
-<script src="Model_2_pH_files/libs/quarto-html/quarto.js"></script>
-<script src="Model_2_pH_files/libs/quarto-html/popper.min.js"></script>
-<script src="Model_2_pH_files/libs/quarto-html/tippy.umd.min.js"></script>
-<script src="Model_2_pH_files/libs/quarto-html/anchor.min.js"></script>
-<link href="Model_2_pH_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="Model_2_pH_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="Model_2_pH_files/libs/bootstrap/bootstrap.min.js"></script>
-<link href="Model_2_pH_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="Model_2_pH_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./Model2_logk.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
 
 
 </head>
 
-<body class="fullcontent">
+<body class="nav-sidebar floating">
 
-<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
-
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">logk vs pH</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">RP-HPLC</a> 
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Columns: XBridge Shield and XTerra</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./Model_1.html" class="sidebar-item-text sidebar-link">Model 1</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Model_1_a.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Stan code</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Model_1_b.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Estimated parameters</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Model_1_c.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Comparison of population parameter values</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Model_1_d.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Comparison of individual parameter values</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./Model_2.html" class="sidebar-item-text sidebar-link">Model 2</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Model_2_a.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Stan code</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Model_2_b.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Estimated parameters</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Model_2_c.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Comparison of population parameter values</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Model2_logk.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">logk vs fi</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Model_2_pH.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">logk vs pH</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#individual-predictions" id="toc-individual-predictions" class="nav-link active" data-scroll-target="#individual-predictions"><span class="toc-section-number">9.0.1</span>  Individual predictions</a></li>
+  <li><a href="#population-predictions" id="toc-population-predictions" class="nav-link" data-scroll-target="#population-predictions"><span class="toc-section-number">9.0.2</span>  Population predictions</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">logk vs pH</span></h1>
+</div>
 
 
-<section id="logk-vs-ph" class="level2">
-<h2 class="anchored" data-anchor-id="logk-vs-ph">logk vs pH</h2>
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
 <div class="cell">
 
 </div>
-<section id="individual-predictions" class="level3">
-<h3 class="anchored" data-anchor-id="individual-predictions">Individual predictions</h3>
+<section id="individual-predictions" class="level3" data-number="9.0.1">
+<h3 data-number="9.0.1" class="anchored" data-anchor-id="individual-predictions"><span class="header-section-number">9.0.1</span> Individual predictions</h3>
 <div class="cell">
 
 </div>
-<section id="xbridge-shield-c18" class="level4">
-<h4 class="anchored" data-anchor-id="xbridge-shield-c18">XBridge Shield C18</h4>
+<section id="xbridge-shield-c18" class="level4" data-number="9.0.1.1">
+<h4 data-number="9.0.1.1" class="anchored" data-anchor-id="xbridge-shield-c18"><span class="header-section-number">9.0.1.1</span> XBridge Shield C18</h4>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Model_2_pH_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
-<section id="xterra-c18" class="level4">
-<h4 class="anchored" data-anchor-id="xterra-c18">XTerra C18</h4>
+<section id="xterra-c18" class="level4" data-number="9.0.1.2">
+<h4 data-number="9.0.1.2" class="anchored" data-anchor-id="xterra-c18"><span class="header-section-number">9.0.1.2</span> XTerra C18</h4>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Model_2_pH_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
-<section id="combined" class="level4">
-<h4 class="anchored" data-anchor-id="combined">Combined</h4>
+<section id="combined" class="level4" data-number="9.0.1.3">
+<h4 data-number="9.0.1.3" class="anchored" data-anchor-id="combined"><span class="header-section-number">9.0.1.3</span> Combined</h4>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Model_2_pH_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
@@ -80,29 +228,29 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </section>
 </section>
-<section id="population-predictions" class="level3">
-<h3 class="anchored" data-anchor-id="population-predictions">Population predictions</h3>
+<section id="population-predictions" class="level3" data-number="9.0.2">
+<h3 data-number="9.0.2" class="anchored" data-anchor-id="population-predictions"><span class="header-section-number">9.0.2</span> Population predictions</h3>
 <div class="cell">
 
 </div>
-<section id="xbridge-shield-c18-1" class="level4">
-<h4 class="anchored" data-anchor-id="xbridge-shield-c18-1">XBridge Shield C18</h4>
+<section id="xbridge-shield-c18-1" class="level4" data-number="9.0.2.1">
+<h4 data-number="9.0.2.1" class="anchored" data-anchor-id="xbridge-shield-c18-1"><span class="header-section-number">9.0.2.1</span> XBridge Shield C18</h4>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Model_2_pH_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
-<section id="xterra-c18-1" class="level4">
-<h4 class="anchored" data-anchor-id="xterra-c18-1">XTerra C18</h4>
+<section id="xterra-c18-1" class="level4" data-number="9.0.2.2">
+<h4 data-number="9.0.2.2" class="anchored" data-anchor-id="xterra-c18-1"><span class="header-section-number">9.0.2.2</span> XTerra C18</h4>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Model_2_pH_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
-<section id="combined-1" class="level4">
-<h4 class="anchored" data-anchor-id="combined-1">Combined</h4>
+<section id="combined-1" class="level4" data-number="9.0.2.3">
+<h4 data-number="9.0.2.3" class="anchored" data-anchor-id="combined-1"><span class="header-section-number">9.0.2.3</span> Combined</h4>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="Model_2_pH_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
@@ -113,12 +261,12 @@ ul.task-list li input[type="checkbox"] {
 <p><img src="Model_2_pH_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-</section>
+
+
 </section>
 </section>
 
-</main>
-<!-- /main column -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -217,6 +365,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./Model2_logk.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">logk vs fi</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
 </div> <!-- /content -->
 
 

@@ -20,6 +20,7 @@ book:
       - Model_2_b.qmd
       - Model_2_c.qmd
       - Model2_logk.qmd
+      - Model_2_pH.qmd
     #  - intro.qmd
     #  - summary.qmd
     #  - references.qmd

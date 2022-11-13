@@ -1,4 +1,4 @@
-## logk vs fi
+## logk vs pH
 
 ```{r, fig.height=8}
 #| echo: false
@@ -136,33 +136,34 @@ logPobs2=logP2
 trobs2=data2$RT
 
 index <- c(10,11)
-pH_value <- c(2.5,10.5)
+pH_value <- c(2,3,4,5,6,7,8,9,10,11,12)
 gradient <- 30
 temp <-25
 nAnalytes3 <- length(index)
+fi_value <- c(0.5)
 
-fi <- rep(rep(seq(0,1,by=0.1),length(pH_value)),2*nAnalytes3)
-pH <- rep(rep(pH_value,each=length(seq(0,1,by=0.1))*2),nAnalytes3)
+fi <- rep(rep(fi_value,length(pH_value)),2*nAnalytes3)
+pH <- rep(rep(pH_value,each=length(fi_value)*2),nAnalytes3)
 fipH3 <-cbind(fi,pH)
 
-mod3 <- rep(rep(c(2,1),each=length(seq(0,1,by=0.1))),2*nAnalytes3)
+mod3 <- rep(rep(c(2,1),each=length(fi_value)),length(pH_value)*nAnalytes3)
 steps3=4*(2-mod3) + 10*(mod3-1)
-hplcparam3=cbind(rep(gradient,by=length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
-                 rep(2.1,by=length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
-                 rep(0.532,by=length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
-                 rep(0.04,by=length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
-                 rep(0.05,by=length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
-                 rep(0.8,by=length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
+hplcparam3=cbind(rep(gradient,by=length(pH_value)*length(fi_value)*2*nAnalytes3),
+                 rep(2.1,by=length(pH_value)*length(fi_value)*2*nAnalytes3),
+                 rep(0.532,by=length(pH_value)*length(fi_value)*2*nAnalytes3),
+                 rep(0.04,by=length(pH_value)*length(fi_value)*2*nAnalytes3),
+                 rep(0.05,by=length(pH_value)*length(fi_value)*2*nAnalytes3),
+                 rep(0.8,by=length(pH_value)*length(fi_value)*2*nAnalytes3),
                  mod3,
-                 rep(0,length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
-                 rep(0,length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
-                 rep(0,length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3),
-                 (rep(temp,each=length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3)-25)/10)
+                 rep(0,length(pH_value)*length(fi_value)*2*nAnalytes3),
+                 rep(0,length(pH_value)*length(fi_value)*2*nAnalytes3),
+                 rep(0,length(pH_value)*length(fi_value)*2*nAnalytes3),
+                 (rep(temp,each=length(pH_value)*length(fi_value)*2*nAnalytes3)-25)/10)
 
-nObs3 <- length(pH_value)*length(seq(0,1,by=0.1))*2*nAnalytes3
-analyte3 <- rep(which(unique(data1$METID) %in% index),each=length(pH_value)*length(seq(0,1,by=0.1))*2)  # 1 - column (xbridge)
-analyte4 <- rep(which(unique(data2$METID) %in% index),each=length(pH_value)*length(seq(0,1,by=0.1))*2)  # 2 - column (xterra)
-analyte5 <- rep(c(1,2),each=length(pH_value)*length(seq(0,1,by=0.1))*2)  # 2 - column (xterra)
+nObs3 <- length(pH_value)*length(fi_value)*2*nAnalytes3
+analyte3 <- rep(which(unique(data1$METID) %in% index),each=length(pH_value)*length(fi_value)*2)  # 1 - column (xbridge)
+analyte4 <- rep(which(unique(data2$METID) %in% index),each=length(pH_value)*length(fi_value)*2)  # 2 - column (xterra)
+analyte5 <- rep(c(1,2),each=length(pH_value)*length(fi_value)*2)  # 2 - column (xterra)
 pKaslit3 = pKaslit[which(dataACD$METID %in% index),1:maxR]              # pKa values as predicted by ACD
 pKasliterror3 = pKasliterror[which(dataACD$METID %in% index),1:maxR]    # pKa error as predicted by ACD
 chargesA3 = chargesA[which(dataACD$METID %in% index),1:(maxR+1)]   # number of ionized groups (anions)
@@ -229,9 +230,9 @@ stan_rdump(c("nAnalytes1",
              "pKaslit3",  
              "pKasliterror3",
              "fipH3"),
-           file="C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/model_qq_1.data.R")
+           file="C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/model_qq_2.data.R")
 
-#model_qq <- cmdstan_model("C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/hplc-gra-redsum_qsrr_04_10_qq_1.stan")
+model_qq <- cmdstan_model("C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/hplc-gra-redsum_qsrr_04_10_qq_2.stan")
 
 #fit_Combined <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_1.csv',
 #                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_2.csv',
@@ -244,11 +245,11 @@ stan_rdump(c("nAnalytes1",
 #                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_9.csv',
 #                                           'C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/TASK/output_10.csv'))
 
-#fit_1_qq  <- model_qq$generate_quantities(fit_Combined,data = "C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/model_qq_1.data.R",seed = 123)
+#fit_2_qq  <- model_qq$generate_quantities(fit_Combined,data = "C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/model_qq_2.data.R",seed = 123)
 #rm(fit_Combined,hplcparam1,hplcparam2,hplcparam3,hplcparam4,model_qq,data1,data2)
-#fit_1_qq$save_object(file = "C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/fit_1_qq.RDS")
-fit_1_qq <- readRDS("C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/fit_1_qq.RDS")
-draws_1_qq_df <- fit_1_qq$draws(format = "df")
+#fit_2_qq$save_object(file = "C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/fit_2_qq.RDS")
+fit_2_qq <- readRDS("C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/fit_2_qq.RDS")
+draws_2_qq_df <- fit_2_qq$draws(format = "df")
 #write.csv(draws_1_qq_df,"C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/draws_04_10_1_qq.csv", row.names = TRUE)
 
 ```
@@ -259,7 +260,7 @@ draws_1_qq_df <- fit_1_qq$draws(format = "df")
 #| echo: false
 #| message: false
 #| warning: false
-df <- draws_1_qq_df
+df <- draws_2_qq_df
 logkCond1 <- apply(df[,which(colnames(df) %in% grep("logkCond1", names(df), value = TRUE))], MARGIN = 2, FUN = quantile, probs = c(.025,.5,.975))
 logkCond2 <- apply(df[,which(colnames(df) %in% grep("logkCond2", names(df), value = TRUE))], MARGIN = 2, FUN = quantile, probs = c(.025,.5,.975))
 
@@ -285,11 +286,11 @@ names(pH.labs) <- c('2.5','10.5')
 #| message: false
 #| warning: false
 ggplot(df_logkCond)+ 
-  geom_line(aes(x = fi,  y = trCond1_Median, color =analyte5))+
-  geom_ribbon(aes(x = fi, ymin = trCond1_Low, ymax = trCond1_High, color = analyte5), alpha = 0.25)+
-  facet_grid(pH~Mod,labeller = labeller(Mod=mod.labs,pH=pH.labs))+
+  geom_line(aes(x = pH,  y = trCond1_Median, color =analyte5))+
+  geom_ribbon(aes(x = pH, ymin = trCond1_Low, ymax = trCond1_High, color = analyte5), alpha = 0.25)+
+  facet_grid(~Mod,labeller = labeller(Mod=mod.labs))+
   scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", "blue")) +
-  labs(x ="fi", y = "log k", color = "Analyte")
+  labs(x ="pH", y = "log k", color = "Analyte")
 ```
 
 
@@ -300,12 +301,13 @@ ggplot(df_logkCond)+
 #| message: false
 #| warning: false
 ggplot(df_logkCond)+ 
-  geom_line(aes(x = fi,  y = trCond2_Median, color =analyte5))+
-  geom_ribbon(aes(x = fi, ymin = trCond2_Low, ymax = trCond2_High, color = analyte5), alpha = 0.25)+
-  facet_grid(pH~Mod,labeller = labeller(Mod=mod.labs,pH=pH.labs))+
+  geom_line(aes(x = pH,  y = trCond2_Median, color =analyte5))+
+  geom_ribbon(aes(x = pH, ymin = trCond2_Low, ymax = trCond2_High, color = analyte5), alpha = 0.25)+
+  facet_grid(~Mod,labeller = labeller(Mod=mod.labs))+
   scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", "blue")) +
-  labs(x ="fi", y = "log k", color = "Analyte")
+  labs(x ="pH", y = "log k", color = "Analyte")
 ```
+
 
 #### Combined
 
@@ -315,17 +317,17 @@ ggplot(df_logkCond)+
 #| warning: false
 
 df_logkCond_Com <- rbind(as.data.frame(t(logkCond1)),as.data.frame(t(logkCond2)))
-df_logkCond_Com <- cbind(rep(analyte5,2),df_logkCond_Com,fi,pH,rep(mod3,2),rep(c("Xbrigde Shield C18","XTerra C18"),each=88))
+df_logkCond_Com <- cbind(rep(analyte5,2),df_logkCond_Com,fi,pH,rep(mod3,2),rep(c("Xbrigde Shield C18","XTerra C18"),each=nrow(df_logkCond)))
 colnames(df_logkCond_Com) <- c("analyte5","trCond_Low","trCond_Median","trCond_High","fi","pH","Mod","Column")
 
 df_logkCond_Com$analyte5 <- as.factor(df_logkCond_Com$analyte5)
 
 ggplot(df_logkCond_Com)+
-    geom_line(aes(x = fi,  y = trCond_Median, color =analyte5))+
-    geom_ribbon(aes(x = fi, ymin = trCond_Low, ymax = trCond_High, color = analyte5), alpha = 0.25)+
-    facet_grid(pH~Mod+Column,labeller = labeller(Mod=mod.labs,pH=pH.labs))+
-    scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", "blue","lightred","lightblue")) +
-    labs(x ="fi", y = "log k", color = "Analyte")
+    geom_line(aes(x = pH,  y = trCond_Median, color =analyte5))+
+    geom_ribbon(aes(x = pH, ymin = trCond_Low, ymax = trCond_High, color = analyte5), alpha = 0.25)+
+    facet_grid(Column~Mod,labeller = labeller(Mod=mod.labs))+
+    scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", "blue")) +
+    labs(x ="pH", y = "log k", color = "Analyte")
 ```
 
 
@@ -335,7 +337,7 @@ ggplot(df_logkCond_Com)+
 #| echo: false
 #| message: false
 #| warning: false
-df <- draws_1_qq_df
+df <- draws_2_qq_df
 logkPred1 <- apply(df[,which(colnames(df) %in% grep("logkPred1", names(df), value = TRUE))], MARGIN = 2, FUN = quantile, probs = c(.025,.5,.975))
 logkPred2 <- apply(df[,which(colnames(df) %in% grep("logkPred2", names(df), value = TRUE))], MARGIN = 2, FUN = quantile, probs = c(.025,.5,.975))
 
@@ -346,9 +348,6 @@ df_logkPred$analyte5 <- as.factor(df_logkPred$analyte5)
 
 mod.labs <- c("ACN","MeOH")
 names(mod.labs) <- c('2','1')
-
-pH.labs <- c("pH = 2.5","pH = 10.5")
-names(pH.labs) <- c('2.5','10.5')
 
 ```
 
@@ -361,11 +360,11 @@ names(pH.labs) <- c('2.5','10.5')
 #| message: false
 #| warning: false
 ggplot(df_logkPred)+ 
-  geom_line(aes(x = fi,  y = trCond1_Median, color =analyte5))+
-  geom_ribbon(aes(x = fi, ymin = trCond1_Low, ymax = trCond1_High, color = analyte5), alpha = 0.25)+
-  facet_grid(pH~Mod,labeller = labeller(Mod=mod.labs,pH=pH.labs))+
+  geom_line(aes(x = pH,  y = trCond1_Median, color =analyte5))+
+  geom_ribbon(aes(x = pH, ymin = trCond1_Low, ymax = trCond1_High, color = analyte5), alpha = 0.25)+
+  facet_grid(~Mod,labeller = labeller(Mod=mod.labs))+
   scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", "blue")) +
-  labs(x ="fi", y = "log k", color = "Analyte")
+  labs(x ="pH", y = "log k", color = "Analyte")
 ```
 
 
@@ -376,11 +375,11 @@ ggplot(df_logkPred)+
 #| message: false
 #| warning: false
 ggplot(df_logkPred)+ 
-  geom_line(aes(x = fi,  y = trCond2_Median, color =analyte5))+
-  geom_ribbon(aes(x = fi, ymin = trCond2_Low, ymax = trCond2_High, color = analyte5), alpha = 0.25)+
-  facet_grid(pH~Mod,labeller = labeller(Mod=mod.labs,pH=pH.labs))+
+  geom_line(aes(x = pH,  y = trCond2_Median, color =analyte5))+
+  geom_ribbon(aes(x = pH, ymin = trCond2_Low, ymax = trCond2_High, color = analyte5), alpha = 0.25)+
+  facet_grid(~Mod,labeller = labeller(Mod=mod.labs))+
   scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", "blue")) +
-  labs(x ="fi", y = "log k", color = "Analyte")
+  labs(x ="pH", y = "log k", color = "Analyte")
 ```
 
 #### Combined
@@ -391,18 +390,19 @@ ggplot(df_logkPred)+
 #| warning: false
 
 df_logkPred_Com <- rbind(as.data.frame(t(logkPred1)),as.data.frame(t(logkPred2)))
-df_logkPred_Com <- cbind(rep(analyte5,2),df_logkPred_Com,fi,pH,rep(mod3,2),rep(c("Xbrigde Shield C18","XTerra C18"),each=88))
+df_logkPred_Com <- cbind(rep(analyte5,2),df_logkPred_Com,fi,pH,rep(mod3,2),rep(c("Xbrigde Shield C18","XTerra C18"),each=nrow(df_logkPred)))
 colnames(df_logkPred_Com) <- c("analyte5","trCond_Low","trCond_Median","trCond_High","fi","pH","Mod","Column")
 
 df_logkPred_Com$analyte5 <- as.factor(df_logkPred_Com$analyte5)
 
 ggplot(df_logkPred_Com)+
-    geom_line(aes(x = fi,  y = trCond_Median, color =analyte5))+
-    geom_ribbon(aes(x = fi, ymin = trCond_Low, ymax = trCond_High, color = analyte5), alpha = 0.25)+
-    facet_grid(pH~Mod+Column,labeller = labeller(Mod=mod.labs,pH=pH.labs))+
+    geom_line(aes(x = pH,  y = trCond_Median, color =analyte5))+
+    geom_ribbon(aes(x = pH, ymin = trCond_Low, ymax = trCond_High, color = analyte5), alpha = 0.25)+
+    facet_grid(Column~Mod,labeller = labeller(Mod=mod.labs))+
     scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", "blue","lightred","lightblue")) +
-    labs(x ="fi", y = "log k", color = "Analyte")
+    labs(x ="pH", y = "log k", color = "Analyte")
 ```
+
 
 ```{r, fig.height=6}
 #| echo: false
@@ -410,17 +410,17 @@ ggplot(df_logkPred_Com)+
 #| warning: false
 
 df_logkPred_Com <- rbind(as.data.frame(t(logkPred1)),as.data.frame(t(logkPred2)))
-df_logkPred_Com <- cbind(rep(analyte5,2),df_logkPred_Com,fi,pH,rep(mod3,2),rep(c("Xbrigde Shield C18","XTerra C18"),each=88))
+df_logkPred_Com <- cbind(rep(analyte5,2),df_logkPred_Com,fi,pH,rep(mod3,2),rep(c("Xbrigde Shield C18","XTerra C18"),each=nrow(df_logkPred)))
 colnames(df_logkPred_Com) <- c("analyte5","trCond_Low","trCond_Median","trCond_High","fi","pH","Mod","Column")
 
 df_logkPred_Com$analyte5 <- as.factor(df_logkPred_Com$analyte5)
 levels(df_logkPred_Com$analyte5) <- c("Sulfamerazine","Veratridine")
 
 ggplot(df_logkPred_Com)+
-    geom_line(aes(x = fi,  y = trCond_Median, color =Column))+
-    geom_ribbon(aes(x = fi, ymin = trCond_Low, ymax = trCond_High, color = Column), alpha = 0.25)+
-    facet_grid(pH~Mod+analyte5,labeller = labeller(Mod=mod.labs,pH=pH.labs))+
+    geom_line(aes(x = pH,  y = trCond_Median, color =Column))+
+    geom_ribbon(aes(x = pH, ymin = trCond_Low, ymax = trCond_High, color = Column), alpha = 0.25)+
+    facet_grid(analyte5~Mod,labeller = labeller(Mod=mod.labs))+
 #    scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", #"blue","lightred","lightblue")) +
-    labs(x ="fi", y = "log k", color = "Analyte")
+    labs(x ="pH", y = "log k", color = "Analyte")
 ```
 

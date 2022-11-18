@@ -21,6 +21,7 @@ book:
       - Model_2_c.qmd
       - Model2_logk.qmd
       - Model_2_pH.qmd
+      - Model_2_utility_pH.qmd
     #  - intro.qmd
     #  - summary.qmd
     #  - references.qmd

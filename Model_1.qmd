@@ -2,4 +2,4 @@
 
 This model was described in the article: "[Toward the general mechanistic model of liquid chromatographic retention](https://pubs.acs.org/doi/10.1021/acs.analchem.2c02034)" (link to the model description on github <https://akamedulska.github.io/lc-ms/script.html>).
 
-
+In this approach, the same model structure was used for each of the columns and the parameters were estimated, and then the results were compared.

@@ -1,0 +1,26 @@
+# Incomplete stan code {.unnumbered}
+
+Stan code for model:
+
+```{r}
+#| echo: false
+writeLines(readLines("C:/Users/agnie/Desktop/HPLC_2022/3_24_11_combined/TASK/hplc-gra-redsum_qsrr_24_11.stan"))
+
+fit <- cmdstanr::as_cmdstan_fit(c('C:/Users/agnie/Desktop/HPLC_2022/3_24_11_combined/TASK/output_1.csv',
+                                  'C:/Users/agnie/Desktop/HPLC_2022/3_24_11_combined/TASK/output_2.csv',
+                                  'C:/Users/agnie/Desktop/HPLC_2022/3_24_11_combined/TASK/output_3.csv',
+                                  'C:/Users/agnie/Desktop/HPLC_2022/3_24_11_combined/TASK/output_4.csv',
+                                  'C:/Users/agnie/Desktop/HPLC_2022/3_24_11_combined/TASK/output_5.csv',
+                                  'C:/Users/agnie/Desktop/HPLC_2022/3_24_11_combined/TASK/output_6.csv',
+                                  'C:/Users/agnie/Desktop/HPLC_2022/3_24_11_combined/TASK/output_7.csv',
+                                  'C:/Users/agnie/Desktop/HPLC_2022/3_24_11_combined/TASK/output_8.csv',
+                                  'C:/Users/agnie/Desktop/HPLC_2022/3_24_11_combined/TASK/output_9.csv',
+                                  'C:/Users/agnie/Desktop/HPLC_2022/3_24_11_combined/TASK/output_10.csv'))
+
+summary <- fit$print(c("logkwHat1","logkwHat2","S1mHat1","S1mHat2","S1aHat1","S1aHat2", 
+            "dlogkwHat1","dlogkwHat2", "dSmHat1","dSmHat2", "dSaHat1","dSaHat2", "S2mHat1","S2mHat2", "S2aHat1","S2aHat2",
+            "beta1","beta2","alphaAHat","alphaBHat",
+            "dlogkTHat1","dlogkTHat2","omegadlogkT1","omegadlogkT2",
+            "apH1","apH2","msigma1","msigma2","ssigma1","ssigma2",
+            "omega1","omega2","rho11","rho12","L2","kappa1","kappa2","tau"), max_rows=100)
+```

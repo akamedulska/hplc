@@ -1,9 +1,89 @@
-# Introduction
+# General model {.unnumbered}
 
-This is a book created from markdown and executable code.
+Retention time $t_{R,z}$ under organic modifier gradient was calculated utilizing the well-known integral equation:
 
-See @knuth84 for additional discussion of literate programming.
+$$
+\int_0^{t_{R,z}-t_0-t_e}\frac{dt}{t_0\cdot ki_{i[z],m[z],b[z],T[z],j[z]} (t) }=1,
+$$ {#eq-tr}
 
-```{r}
-1 + 1
-```
+where
+
+* $ki_{i[z],m[z],b[z],T[z],j[z]} (t)$ - instantaneous isocratic retention factor corresponding to the mobile phase composition at time t at column inlet for a particular measurement $z$, 
+* $t_0$ - column hold-up (dead) time
+* $t_e$ - extra column-time.
+
+On the other hand, the subscripts correspond, respectively:
+
+* r - dissociation step, 
+* i - analyte, 
+* m - organic modifier (1 for MeOH, 2 for ACN), 
+* j - organic modifier content, 
+* b - pH (b=1,...,9, corresponding to nominal pH of 2.5, 3.3, 4.1, 4.9, 5.8, 6.8, 8.9, 9.7, 10.5, respectively), 
+* T - temperature (1-$25^0C$ and 2-$35^0C$).
+
+The following function described the relationship between the isocratic retention factor and pH for an analyte with R dissociation steps and R+1 forms:
+
+\begin{equation} 
+ki_{i,m,b,T,j}=\frac{k_{1,i,m,b,T,j}+\sum_{r=1}^R k_{r+1,i,m,b,T,j} \cdot 10^{r\cdot pH_{m,b,T,j}-\sum_{r=1}^R pKa_{r,i,m,j} } }{1+\sum_{r=1}^R 10^{r\cdot pH_{m,b,T,j}-\sum_{r=1}^R pKa_{r,i,m,j} } }.
+\end{equation}
+
+Further, it was assumed that $k_{r,i,m,b,T,j}$ depends on the organic modifier content, pH and temperature:
+
+\begin{align} 
+logk_{r,m,i,b,T,j}&=logkw_{r,i}-\frac{S1_{r,i,m}\cdot (1+S2_m )\cdot \varphi_j}{1+S2_m \cdot \varphi_j }+dlogkT_i\cdot (T_t-25)/10+   \\  &+ |chargeA_{r,i} | \cdot apHA \cdot (pH_{m,b,T,j}-7)+ \\  &+ |chargeB_{r,i} | \cdot apHB \cdot (pH_{m,b,T,j}-7),
+\end{align}
+
+where $logkw_{r,i}$ represents logarithm of retention factors extrapolated to $0\%$ of organic modifier content for the neutral and ionized forms of analytes; $S1_{r,i,m}$ and $S2_m$ are the slopes in the Neue equation; $dlogkT_i$ denotes the change in logkw due to the increase in temperature by $10^0C$.In this parametrization of Neue equation, S1 parameter reflects the difference betweenlogarithm of retention factors corresponding to water ($0\%$ of organic modifier content) and MeOH or ACN ($100\%$ of organic modifier content) as eluents, apH denotes the pH effects (common for all analytes); $chargeA_{r,i}$ and $chargeB_{r,i}$ denote a charge state of an analyte ($chargeA_{r,i}=\{0, -1, -2, \ldots\}$ for acids, and $chargeB_{r,i}=\{0, -1, -2, \ldots\}$ for bases), and $|.|$ denotes absolute value.
+
+The relationship between pH and the content of organic modifier for various combinations of organic modifier and buffer was experimentally determined prior to the chromatographic analysis. In this settings pH and consequently pKa values correspond to ${_w^s}pH$ or ${_w^s}pKa$ scale. The obtained relationships was then described using quadratic equations for each nominal pH, temperature and organic modifier (36 equations in total):
+
+
+$$ 
+pH_{m,b,T,j}=pHo_{m,b,T}+\alpha 1_{m,b,T}\cdot \varphi_j+\alpha 2_{m,b,T}\cdot {\varphi_j}^2,
+$$
+
+where $pHo_{m,b,T}$,$\alpha 1_{m,b,T}$ and $\alpha 2_{m,b,T}$ are regression coefficient specific for a given condition.
+
+Further a linear relationship between pKa values and the organic modifier content was assumed: 
+$$
+pKa_{r,i,m,j}=pKaw_{r,i}+\alpha_{r,i,m}\cdot\varphi_j       
+$$
+
+where $pKa_{r,i,m,j}$ denotes dissociationconstant of an analyte in given chromatographic conditions, $pKaw_{r,i}$ denotes aqueous pKa, and $\alpha_{r,i,m}\cdot\varphi_j$ denotes the slope due to changes in organic modifier.The linear relationshipis generally valid for $\varphi_j<0.8$.
+
+### The analyte-level model
+
+The $logkw_{r,i}$, $S1_{r,i,m}$ parameters were calculated based on retention parameters of the neutral form of an analyte, and the difference in logkw and S1 values between the neutral and ionized form of an analyte.
+
+\begin{align}
+&logkw_{r,i}=logkwN_i+|chargeA_{r,i} |\cdot dlogkwA_{r,i}+ |chargeB_{r,i} |\cdot dlogkwB_{r,i}  \\
+&S1_{r,i,m=1}=S1mN_i+|chargeA_{r,i} |\cdot dS1mA_{r,i}+ |chargeB_{r,i} |\cdot dS1mB_{r,i}   \\
+&S1_{r,i,m=2}=S1aN_i+|chargeA_{r,i} |\cdot dS1aA_{r,i}+ |chargeB_{r,i} |\cdot dS1aB_{r,i}
+\end{align}
+
+Similarly the $\alpha$ parameters were assumed to be different for acids and bases:
+
+\begin{align}
+&\alpha_{r,i,m=1}=\alpha mA_{r,i}\cdot groupA_{r,i}+\alpha mB_{r,i} \cdot groupB_{r,i}\\
+&\alpha_{r,i,m=2}=\alpha aA_{r,i}\cdot groupA_{r,i}+\alpha aB_{r,i} \cdot groupB_{r,i}  
+\end{align}
+
+where $groupA_{r,i}$ and $groupB_{r,i}$ denote the type of dissociating group ($groupA_{r,i}=1$ if acidic and 0 otherwise, $groupB_{r,i}=1$ if basic and 0 otherwise).
+
+The second-level part of the model describes the relationship between analyte-specific parameters and predictors. The pa-rameters for the neutral form of an analyte were assumed to be correlated and related to log P and functional groups:
+
+
+\begin{align}
+\begin{bmatrix}
+logkwN_i\\
+S1mN_i\\
+S1aN_i
+\end{bmatrix} \sim
+MNV \begin{pmatrix}
+\theta_{\log kwN}+\beta_{\log kwN}\cdot (\log P_i -2.2)+\pi_{\log kwN}\cdot X & \\
+\theta_{S1mN}+\beta_{S1mN}\cdot (\log P_i -2.2)+\pi_{S1mN}\cdot X & \Omega \\
+\theta_{S1aN}+\beta_{S1aN}\cdot (\log P_i -2.2)+\pi_{S1aN}\cdot X & 
+\end{pmatrix}
+\end{align}
+
+where *MVN* denotes the multivariate normal distribution; $\theta_{\log kwN}$, $\theta_{S1mN}$ and $\theta_{S1aN}$ are the mean values of individual chromatographic parameters that correspond to a typical analyte with logP=2.2, with no functional groups at $25^0C$; $\beta_{\log kwN}$, $\beta_{S1mN}$ and $\beta_{S1aN}$ are regression coefficients between the individual chromatographic parameters and the $\log P_i$ values; $\pi_i$ is an effect of each functional group on chromatographic parameters with separate values for $\log kwN$, $S1mN$ and $S1aN$. $\pi$ represents the difference in chromatographic parameters due to the presence of a functional group, assuming all else being equal. $X$ is a matrix of size 187 x 60 that decodes the number of functional groups present on each analyte.

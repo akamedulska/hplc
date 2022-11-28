@@ -8,6 +8,7 @@ book:
   date: "7.10.2022"
   chapters:
     - index.qmd
+    - intro.qmd
     - part: Model_1.qmd
       chapters:
       - Model_1_a.qmd
@@ -22,6 +23,7 @@ book:
       - Model2_logk.qmd
       - Model_2_pH.qmd
       - Model_2_utility_pH.qmd
+    - incomplete_code.qmd  
     #  - intro.qmd
     #  - summary.qmd
     #  - references.qmd

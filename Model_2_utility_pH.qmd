@@ -283,10 +283,10 @@ fit_3_qq <- readRDS("C:/Users/agnie/Desktop/HPLC_2022/1_25_09_combined/01_04_10/
 draws_3_qq_df <- fit_3_qq$draws(format = "df")
 ```
 
-###  Individual
+### Individual
 
 ```{r, fig.height=6}
-#| echo: false
+#| echo: true
 #| message: false
 #| warning: false
 df <- draws_3_qq_df
@@ -334,7 +334,5 @@ names(mod.labs) <- c('2','1')
 
 ggplot(data_to_plot[which(data_to_plot$temp_plot==25),])+
     geom_line(aes(x = pHo,  y = utility_function, color =Column))+
-    facet_grid(~mod3_plot,labeller = labeller(mod3_plot=mod.labs))#+
-#    scale_color_manual(labels =unique(data1$Name[which(data1$METID %in% index)]), values = c("red", #"blue","lightred","lightblue")) +
-#    labs(x ="pH", y = "log k", color = "Analyte")
+    facet_grid(~mod3_plot,labeller = labeller(mod3_plot=mod.labs))
 ```
